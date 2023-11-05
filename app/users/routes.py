@@ -1,4 +1,3 @@
-
 from typing import Annotated, Optional
 from fastapi import APIRouter, status, Depends, HTTPException, Request, UploadFile, File, Form
 from sqlalchemy.orm import Session
@@ -52,6 +51,14 @@ def get_user_detail(request: Request):
 
 
 @user_router.put('', status_code=status.HTTP_200_OK)
-async def update_user_data(name: Annotated[str, Form()], image: Optional[UploadFile] = None):
+async def update_user_data(
+        request: Request,
+        name: Annotated[str, Form()],
+        email: Annotated[str, Form()],
+        image: Optional[UploadFile] = None,
+        db: Session = Depends(get_db),
+):
+    print(request.user.id)
     print(name)
+    print(email)
     print(image.filename)

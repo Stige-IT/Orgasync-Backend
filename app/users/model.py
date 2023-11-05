@@ -3,12 +3,12 @@ from datetime import datetime
 from sqlalchemy.orm import deferred
 
 from core.database import Base
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, func, Text
+from sqlalchemy import Column, String, Boolean, DateTime, func, Text
 
 
 class UserModel(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True, autoincrement=False)
+    id = Column(String(100), primary_key=True, autoincrement=False)
     name = Column(String(100))
     image = Column(Text)
     email = Column(String(255), unique=True)

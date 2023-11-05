@@ -13,7 +13,7 @@ settings = get_settings()
 
 
 async def get_token(data, db: Session):
-    user: UserModel = db.query(UserModel).filter(UserModel.email == data.username).first()
+    user: UserModel = db.query(UserModel).filter(UserModel.email == data.email).first()
     if not user:
         raise HTTPException(
             status_code=400,
