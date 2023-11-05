@@ -12,8 +12,11 @@ from app.users.model import UserModel
 settings = get_settings()
 
 
-async def get_token(data, db: Session):
-    user: UserModel = db.query(UserModel).filter(UserModel.email == data.email).first()
+async def get_token(data, db: Session, is_form: bool):
+    if is_form:
+        user: UserModel = db.query(UserModel).filter(UserModel.email == data.username).first()
+    else:
+        user: UserModel = db.query(UserModel).filter(UserModel.email == data.email).first()
     if not user:
         raise HTTPException(
             status_code=400,
