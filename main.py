@@ -1,10 +1,9 @@
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
 from starlette.middleware.authentication import AuthenticationMiddleware
 
-from auth.route import auth_router
+from app.auth.route import auth_router
 from core.security import JWTAuth
-from users.routes import router, user_router
+from app.users.routes import router, user_router
 
 app = FastAPI(version="0.0.1", title="Orgasync Rest API")
 app.include_router(router)

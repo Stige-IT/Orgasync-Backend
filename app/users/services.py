@@ -1,9 +1,10 @@
+import uuid
 from datetime import datetime
 
 from fastapi import HTTPException
 
 from core.security import get_password_hash
-from users.model import UserModel
+from app.users.model import UserModel
 
 
 async def create_user_account(data, db):
@@ -12,6 +13,7 @@ async def create_user_account(data, db):
         raise HTTPException(status_code=422, detail="Email is already registered with us")
 
     new_user = UserModel(
+        id=uuid.uuid4(),
         name=data.name,
         email=data.email,
         password=get_password_hash(data.password),

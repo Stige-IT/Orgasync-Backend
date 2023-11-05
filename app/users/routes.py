@@ -1,13 +1,15 @@
-from fastapi import APIRouter, status, Depends, HTTPException, Request
+
+from typing import Annotated, Optional
+from fastapi import APIRouter, status, Depends, HTTPException, Request, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from core.database import get_db
 from core.security import oauth2_scheme
-from users.model import UserModel
-from users.response import UserResponse
-from users.schemas import CreateUserRequest
-from users.services import create_user_account
+from app.users.model import UserModel
+from app.users.response import UserResponse
+from app.users.schemas import CreateUserRequest, UserRequest
+from app.users.services import create_user_account
 
 router = APIRouter(
     prefix="/users",
@@ -16,7 +18,7 @@ router = APIRouter(
 )
 
 user_router = APIRouter(
-    prefix="/users",
+    prefix="/me",
     tags=["Users"],
     responses={404: {"description": "Not Found"}},
     dependencies=[Depends(oauth2_scheme)]
@@ -44,6 +46,12 @@ async def create_user(data: CreateUserRequest, db: Session = Depends(get_db)):
     return JSONResponse(content=payload)
 
 
-@user_router.post('/me', status_code=status.HTTP_200_OK, response_model=UserResponse)
+@user_router.get('', status_code=status.HTTP_200_OK, response_model=UserResponse)
 def get_user_detail(request: Request):
     return request.user
+
+
+@user_router.put('', status_code=status.HTTP_200_OK)
+async def update_user_data(name: Annotated[str, Form()], image: Optional[UploadFile] = None):
+    print(name)
+    print(image.filename)

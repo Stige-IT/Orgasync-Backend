@@ -8,7 +8,7 @@ from starlette.authentication import AuthCredentials, UnauthenticatedUser
 
 from core.config import get_settings
 from core.database import get_db
-from users.model import UserModel
+from app.users.model import UserModel
 
 settings = get_settings()
 

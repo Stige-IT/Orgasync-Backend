@@ -11,3 +11,4 @@ class UserResponse(BaseModel):
     is_active: bool
     is_verified: bool
     registered_at: Union[None, datetime] = None
+

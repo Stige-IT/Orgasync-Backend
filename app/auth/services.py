@@ -3,10 +3,11 @@ from datetime import timedelta
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from auth.response import TokenResponse
+from app.auth.response import TokenResponse
+from app.auth.schema import LoginRequest
 from core.config import get_settings
 from core.security import verify_password, get_token_payload, create_access_token, create_refresh_token
-from users.model import UserModel
+from app.users.model import UserModel
 
 settings = get_settings()
 
