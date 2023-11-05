@@ -8,7 +8,7 @@ from core.security import oauth2_scheme
 from app.users.model import UserModel
 from app.users.response import UserResponse
 from app.users.schemas import CreateUserRequest, UserRequest
-from app.users.services import create_user_account
+from app.users.services import create_user_account, update_user_account
 
 router = APIRouter(
     prefix="/users",
@@ -58,7 +58,9 @@ async def update_user_data(
         image: Optional[UploadFile] = None,
         db: Session = Depends(get_db),
 ):
-    print(request.user.id)
-    print(name)
-    print(email)
-    print(image.filename)
+    user_id = request.user.id
+    result = await update_user_account(name, email, user_id, image.filename, db)
+    return {
+        "status": result,
+        "message": "user profile succesfull updated"
+    }
