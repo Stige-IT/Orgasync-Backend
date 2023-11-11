@@ -12,3 +12,6 @@ class UserResponse(BaseModel):
     is_verified: bool
     registered_at: Union[None, datetime] = None
 
+    class Config:
+        orm_mode = True
+

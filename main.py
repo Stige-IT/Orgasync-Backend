@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi_pagination import add_pagination
 from starlette.middleware.authentication import AuthenticationMiddleware
 
 from app.auth.route import auth_router
@@ -22,4 +23,5 @@ app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())
 async def root():
     return {"message": "Service Running..."}
 
+add_pagination(app)
 
