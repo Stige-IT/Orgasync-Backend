@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.response import TokenResponse
 from app.auth.schema import LoginRequest
+from app.company.model import Company
 from core.config import get_settings
 from core.security import verify_password, get_token_payload, create_access_token, create_refresh_token
 from app.users.model import UserModel
@@ -15,27 +16,30 @@ settings = get_settings()
 async def get_token(data, db: Session, is_form: bool):
     if is_form:
         user: UserModel = db.query(UserModel).filter(UserModel.email == data.username).first()
+        if not user:
+            user: Company = db.query(Company).filter(Company.email == data.username).first()
     else:
         user: UserModel = db.query(UserModel).filter(UserModel.email == data.email).first()
+        if not user:
+            user: Company = db.query(Company).filter(Company.email == data.email).first()
+
     if not user:
         raise HTTPException(
             status_code=400,
             detail="Email is not registered with us.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
     if not verify_password(data.password, user.password):
         raise HTTPException(
             status_code=400,
             detail="Invalid Login Credentials.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
     _verify_user_access(user)
     return await _get_user_token(user)
 
 
-def _verify_user_access(user: UserModel):
+def _verify_user_access(user):
     if not user.is_active:
         raise HTTPException(
             status_code=400,
@@ -71,7 +75,7 @@ async def get_refresh_token(token, db):
     return await _get_user_token(user=user, refresh_token=token)
 
 
-async def _get_user_token(user: UserModel, refresh_token=None):
+async def _get_user_token(user, refresh_token=None):
     payload = {"id": user.id}
 
     access_token_expiry = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)

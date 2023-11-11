@@ -25,7 +25,7 @@ async def register(request: CreateUserRequest, db: Session = Depends(get_db)):
 
 @auth_router.post("/login", status_code=status.HTTP_200_OK)
 async def authenticate_user(data: LoginRequest, db: Session = Depends(get_db)):
-    return await get_token(data=data, db=db)
+    return await get_token(data=data, db=db, is_form=False, is_company=False)
 
 
 @auth_router.post("/token", status_code=status.HTTP_200_OK)

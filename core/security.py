@@ -6,6 +6,7 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 from starlette.authentication import AuthCredentials, UnauthenticatedUser
 
+from app.company.model import Company
 from core.config import get_settings
 from core.database import get_db
 from app.users.model import UserModel
@@ -56,6 +57,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), db=None):
         db = next(get_db())
 
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        user = db.query(Company).filter(Company.id == user_id).first()
     return user
 
 

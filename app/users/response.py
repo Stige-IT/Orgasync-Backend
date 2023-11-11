@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Union
+from typing import Union, List
 
 from pydantic import BaseModel, EmailStr
 
