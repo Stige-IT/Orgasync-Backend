@@ -43,7 +43,10 @@ def _verify_user_access(user):
     if not user.is_active:
         raise HTTPException(
             status_code=400,
-            detail="Your account is inactive. Please contact support.",
+            detail={
+                "message": "Your account is not active. Please contact support.",
+                "email": "not_active",
+            },
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -51,7 +54,10 @@ def _verify_user_access(user):
         # Trigger user account verification email
         raise HTTPException(
             status_code=400,
-            detail="Your account is unverified. We have resend the account verification email.",
+            detail={
+                "message": "Your account is not verified. Please verify your account.",
+                "email": "not_verified",
+            },
             headers={"WWW-Authenticate": "Bearer"},
         )
 

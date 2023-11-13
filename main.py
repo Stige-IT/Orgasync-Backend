@@ -5,6 +5,7 @@ from starlette.middleware.authentication import AuthenticationMiddleware
 from app.auth.route import auth_router
 from app.company.route import company_router
 from app.employee.route import employee_router
+from app.type.route import type_company_router
 from core.security import JWTAuth
 from app.users.routes import router, user_router
 
@@ -14,6 +15,7 @@ app.include_router(user_router)
 app.include_router(auth_router)
 app.include_router(company_router)
 app.include_router(employee_router)
+app.include_router(type_company_router)
 
 # middleware
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())

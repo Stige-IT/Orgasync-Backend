@@ -11,7 +11,8 @@ from app.users.model import UserModel
 async def create_user_account(data, db):
     user = db.query(UserModel).filter(UserModel.email == data.email).first()
     if user:
-        raise HTTPException(status_code=422, detail="Email is already registered with us")
+        raise HTTPException(status_code=422,
+                            detail={"message": "Email is already registered with us", "email": "registered"})
 
     new_user = UserModel(
         id=uuid.uuid4(),

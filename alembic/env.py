@@ -12,6 +12,7 @@ from core.database import Base
 from app.users.model import *
 from app.company.model import *
 from app.employee.model import *
+from app.type.model import *
 
 settings = get_settings()
 

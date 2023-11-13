@@ -20,12 +20,12 @@ auth_router = APIRouter(
 async def register(request: CreateUserRequest, db: Session = Depends(get_db)):
     await create_user_account(request, db)
     payload = {"message": "User account has been succesfully created."}
-    return JSONResponse(content=payload)
+    return JSONResponse(content=payload, status_code=status.HTTP_201_CREATED)
 
 
 @auth_router.post("/login", status_code=status.HTTP_200_OK)
 async def authenticate_user(data: LoginRequest, db: Session = Depends(get_db)):
-    return await get_token(data=data, db=db, is_form=False, is_company=False)
+    return await get_token(data=data, db=db, is_form=False)
 
 
 @auth_router.post("/token", status_code=status.HTTP_200_OK)
