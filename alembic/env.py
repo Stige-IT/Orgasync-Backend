@@ -13,6 +13,7 @@ from app.users.model import *
 from app.company.model import *
 from app.employee.model import *
 from app.type.model import *
+from app.auth.model import *
 
 settings = get_settings()
 

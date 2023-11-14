@@ -1,12 +1,13 @@
 from datetime import timedelta
 
 from fastapi import HTTPException
+from fastapi_mail import MessageSchema, FastMail
 from sqlalchemy.orm import Session
 
 from app.auth.response import TokenResponse
-from app.auth.schema import LoginRequest
+from app.auth.template import template_body
 from app.company.model import Company
-from core.config import get_settings
+from core.config import get_settings, configMail
 from core.security import verify_password, get_token_payload, create_access_token, create_refresh_token
 from app.users.model import UserModel
 
@@ -94,3 +95,20 @@ async def _get_user_token(user, refresh_token=None):
         refresh_token=refresh_token,
         expires_in=access_token_expiry.seconds  # in seconds
     )
+
+
+async def send_code_to_email(email: str, code: int):
+    try:
+        message = MessageSchema(
+            subject="Verification Code for Email",
+            recipients=[email],  # List of recipients, as many as you can pass
+            body=template_body(code),
+            subtype="html"
+        )
+
+        fm = FastMail(configMail)
+        await fm.send_message(message)
+        return True
+    except Exception as e:
+        print(e)
+        return False

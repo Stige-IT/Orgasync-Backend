@@ -1,16 +1,17 @@
+import datetime
+import random
+import uuid
 
 from fastapi import APIRouter, status, Depends, Header
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi_mail import MessageSchema, FastMail
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
+from app.auth.model import CodeVerification
 from app.auth.schema import LoginRequest
-from app.auth.services import get_token, get_refresh_token
-from app.auth.template import templateBody
+from app.auth.services import get_token, get_refresh_token, send_code_to_email
 from app.users.schemas import CreateUserRequest
 from app.users.services import create_user_account
-from core.config import configMail
 from core.database import get_db
 
 auth_router = APIRouter(
@@ -43,17 +44,20 @@ async def refresh_access_token(refresh_token: str = Header(), db: Session = Depe
 
 
 # send code for verification email
-@auth_router.post("/send-code", status_code=status.HTTP_200_OK)
+@auth_router.get("/send-code", status_code=status.HTTP_200_OK)
 async def send_code(email: str, db: Session = Depends(get_db)):
-    message = MessageSchema(
-        subject="Verification Code for Email",
-        recipients=[email],  # List of recipients, as many as you can pass
-        body=templateBody,
-        subtype="html"
-    )
-
-    fm = FastMail(configMail)
-    await fm.send_message(message)
-    print(message)
-
+    code = db.query(CodeVerification).filter(CodeVerification.email == email).first()
+    expire_code = datetime.datetime.now() + datetime.timedelta(minutes=5)
+    code_random = random.randint(100000, 999999)
+    new_code = CodeVerification(id=uuid.uuid4(), email=email, code=code_random, expire=expire_code)
+    if code:
+        new_code = CodeVerification(id=uuid.uuid4(), email=email, code=code_random, expire=expire_code)
+        code.code = new_code.code
+        code.expire = new_code.expire
+        db.commit()
+    else:
+        db.add(new_code)
+        db.commit()
+        db.refresh(new_code)
+    result = await send_code_to_email(email, code_random)
     return JSONResponse(status_code=200, content={"message": "email has been sent"})
