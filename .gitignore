@@ -1,4 +1,4 @@
 .idea
 alembic/versions/
 venv
-*.env
+.env
