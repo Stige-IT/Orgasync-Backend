@@ -1,12 +1,16 @@
+
 from fastapi import APIRouter, status, Depends, Header
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi_mail import MessageSchema, FastMail
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from app.auth.schema import LoginRequest
 from app.auth.services import get_token, get_refresh_token
+from app.auth.template import templateBody
 from app.users.schemas import CreateUserRequest
 from app.users.services import create_user_account
+from core.config import configMail
 from core.database import get_db
 
 auth_router = APIRouter(
@@ -36,3 +40,20 @@ async def authenticate_user_from_docs(data: OAuth2PasswordRequestForm = Depends(
 @auth_router.post("/refresh", status_code=status.HTTP_200_OK)
 async def refresh_access_token(refresh_token: str = Header(), db: Session = Depends(get_db)):
     return await get_refresh_token(token=refresh_token, db=db)
+
+
+# send code for verification email
+@auth_router.post("/send-code", status_code=status.HTTP_200_OK)
+async def send_code(email: str, db: Session = Depends(get_db)):
+    message = MessageSchema(
+        subject="Verification Code for Email",
+        recipients=[email],  # List of recipients, as many as you can pass
+        body=templateBody,
+        subtype="html"
+    )
+
+    fm = FastMail(configMail)
+    await fm.send_message(message)
+    print(message)
+
+    return JSONResponse(status_code=200, content={"message": "email has been sent"})
