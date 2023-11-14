@@ -10,6 +10,7 @@ from starlette.responses import JSONResponse
 from app.auth.model import CodeVerification
 from app.auth.schema import LoginRequest
 from app.auth.services import get_token, get_refresh_token, send_code_to_email
+from app.users.model import UserModel
 from app.users.schemas import CreateUserRequest
 from app.users.services import create_user_account
 from core.database import get_db
@@ -24,6 +25,7 @@ auth_router = APIRouter(
 @auth_router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(request: CreateUserRequest, db: Session = Depends(get_db)):
     await create_user_account(request, db)
+    await send_code(request.email, db)
     payload = {"message": "User account has been succesfully created."}
     return JSONResponse(content=payload, status_code=status.HTTP_201_CREATED)
 
@@ -61,3 +63,24 @@ async def send_code(email: str, db: Session = Depends(get_db)):
         db.refresh(new_code)
     result = await send_code_to_email(email, code_random)
     return JSONResponse(status_code=200, content={"message": "email has been sent"})
+
+
+# verify code
+@auth_router.post("/verify-code", status_code=status.HTTP_200_OK)
+async def verify_code(email: str, user_code: int, db: Session = Depends(get_db)):
+    code = db.query(CodeVerification).filter(CodeVerification.email == email).first()
+    if code:
+        if code.expire > datetime.datetime.now():
+            if code.code == str(user_code):
+                db.delete(code)
+                db.commit()
+
+                user = db.query(UserModel).filter(UserModel.email == email).first()
+                user.is_verified = True
+                user.is_active = True
+                user.verified_at = datetime.datetime.now()
+                db.commit()
+                return JSONResponse(status_code=200, content={"message": "code is valid"})
+        else:
+            return JSONResponse(status_code=400, content={"message": "code is expired"})
+    return JSONResponse(status_code=404, content={"message": "code is not valid"})
