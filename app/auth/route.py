@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from app.auth.model import CodeVerification
-from app.auth.schema import LoginRequest
+from app.auth.schema import LoginRequest, VerificationRequest
 from app.auth.services import get_token, get_refresh_token, send_code_to_email
 from app.users.model import UserModel
 from app.users.schemas import CreateUserRequest
@@ -46,7 +46,7 @@ async def refresh_access_token(refresh_token: str = Header(), db: Session = Depe
 
 
 # send code for verification email
-@auth_router.get("/send-code", status_code=status.HTTP_200_OK)
+@auth_router.get("/resend", status_code=status.HTTP_200_OK)
 async def send_code(email: str, db: Session = Depends(get_db)):
     code = db.query(CodeVerification).filter(CodeVerification.email == email).first()
     expire_code = datetime.datetime.now() + datetime.timedelta(minutes=5)
@@ -66,16 +66,16 @@ async def send_code(email: str, db: Session = Depends(get_db)):
 
 
 # verify code
-@auth_router.post("/verify-code", status_code=status.HTTP_200_OK)
-async def verify_code(email: str, user_code: int, db: Session = Depends(get_db)):
-    code = db.query(CodeVerification).filter(CodeVerification.email == email).first()
+@auth_router.post("/verify", status_code=status.HTTP_200_OK)
+async def verify_code(verifyRequest : VerificationRequest, db: Session = Depends(get_db)):
+    code = db.query(CodeVerification).filter(CodeVerification.email == verifyRequest.email).first()
     if code:
         if code.expire > datetime.datetime.now():
-            if code.code == str(user_code):
+            if code.code == str(verifyRequest.code):
                 db.delete(code)
                 db.commit()
 
-                user = db.query(UserModel).filter(UserModel.email == email).first()
+                user = db.query(UserModel).filter(UserModel.email == verifyRequest.email).first()
                 user.is_verified = True
                 user.is_active = True
                 user.verified_at = datetime.datetime.now()

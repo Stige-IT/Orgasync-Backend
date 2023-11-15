@@ -10,10 +10,12 @@ from core.database import Base
 # Import all models
 
 from app.users.model import *
+from app.position.model import *
 from app.company.model import *
 from app.employee.model import *
 from app.type.model import *
 from app.auth.model import *
+
 
 settings = get_settings()
 

@@ -1,8 +1,10 @@
+from app.position.model import *
 from datetime import datetime
 
 from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
+from app.position.constant import defaulIdPosition
 from core.database import Base
 
 
@@ -13,7 +15,10 @@ class Employee(Base):
     user = relationship("UserModel")
 
     id_company = Column(String(100), ForeignKey("company.id"))
-    company = relationship("Company", back_populates="employees")
+    company = relationship("Company")
+
+    id_position = Column(String(100), ForeignKey("position.id"), default=defaulIdPosition)
+    position = relationship("Position")
 
     joined = Column(DateTime, nullable=True, default=datetime.now)
     type = Column(String(25), nullable=True, default="guest")
