@@ -3,16 +3,20 @@ from typing import Union
 
 from pydantic import BaseModel
 
+from app.address.response import AddressResponse
 from app.position.response import PositionResponse
 
 
 class CompanyResponse(BaseModel):
     id: str
     email: Union[None, str] = None
-    name: str
+    logo: Union[None, str] = None
+    cover: Union[None, str] = None
     code: str
+    name: str
     type: Union[None, str] = None
     size: Union[None, int] = None
+    address: Union[None, AddressResponse] = None
 
     class Config:
         from_attributes = True

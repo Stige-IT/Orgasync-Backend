@@ -96,8 +96,9 @@ async def check_name(name: str, db: Session = Depends(get_db)):
     )
 
 
-@company_router.post("/join", status_code=status.HTTP_201_CREATED)
-async def join_company(id_user: str, code: str, db: Session = Depends(get_db)):
+@company_auth_router.post("/join", status_code=status.HTTP_201_CREATED)
+async def join_company(request: Request, code: str, db: Session = Depends(get_db)):
+    id_user = request.user.id
     user_registered = db.query(Employee).filter(Employee.id_user == id_user).first()
     company_registered = db.query(Company).filter(Company.code == code).first()
     if user_registered and company_registered.id == user_registered.id_company:

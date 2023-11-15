@@ -9,6 +9,7 @@ from core.database import Base
 
 # Import all models
 
+from app.address.model import *
 from app.users.model import *
 from app.position.model import *
 from app.company.model import *

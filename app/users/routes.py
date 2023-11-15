@@ -53,8 +53,8 @@ def get_user_detail(request: Request):
 @user_router.put('', status_code=status.HTTP_200_OK)
 async def update_user_data(
         request: Request,
-        name: Annotated[str, Form()],
-        email: Annotated[str, Form()],
+        name: Annotated[str, Form()] = None,
+        email: Annotated[str, Form()] = None,
         image: Optional[UploadFile] = None,
         db: Session = Depends(get_db),
 ):

@@ -3,6 +3,8 @@ from typing import Union, List
 
 from pydantic import BaseModel, EmailStr
 
+from app.address.response import AddressResponse
+
 
 class UserResponse(BaseModel):
     id: str
@@ -12,6 +14,8 @@ class UserResponse(BaseModel):
     is_active: bool
     is_verified: bool
     registered_at: Union[None, datetime] = None
+    # id_address: str
+    # address: Union[None, AddressResponse] = None
 
     class Config:
         from_attributes = True

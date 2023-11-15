@@ -19,6 +19,7 @@ from app.users.model import UserModel
 settings = get_settings()
 
 
+# noinspection PyTypeChecker
 async def get_token(data, db: Session, is_form: bool):
     if is_form:
         user: UserModel = (
@@ -98,7 +99,7 @@ async def get_refresh_token(token, db):
 async def _get_user_token(user, refresh_token=None):
     payload = {"id": user.id}
 
-    access_token_expiry = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expiry = timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
     access_token = await create_access_token(payload, access_token_expiry)
     if not refresh_token:
@@ -106,6 +107,7 @@ async def _get_user_token(user, refresh_token=None):
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,
+        expires_in=access_token_expiry.seconds,
     )
 
 

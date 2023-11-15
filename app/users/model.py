@@ -1,9 +1,10 @@
+import app.address.model
 from datetime import datetime
 
 from sqlalchemy.orm import deferred, relationship
 
 from core.database import Base
-from sqlalchemy import Column, String, Boolean, DateTime, func, Text, TEXT
+from sqlalchemy import Column, String, Boolean, DateTime, func, Text, TEXT, ForeignKey
 
 
 class UserModel(Base):
@@ -14,6 +15,8 @@ class UserModel(Base):
     image = Column(Text)
     email = Column(String(255), unique=True)
     password = deferred(Column(String(100)))
+    id_address = Column(String(100), ForeignKey("address.id"), nullable=True)
+    address = relationship("Address", backref="users", lazy="joined")
     is_active = Column(Boolean, default=False)
     is_verified = Column(Boolean, default=False)
     verified_at = Column(DateTime, nullable=True, default=None)

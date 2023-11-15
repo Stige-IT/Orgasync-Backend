@@ -3,6 +3,7 @@ from fastapi_pagination import add_pagination
 from starlette.middleware.authentication import AuthenticationMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.address.route import address_router, address_auth_router
 from app.auth.route import auth_router
 from app.company.route import company_router, company_auth_router
 from app.employee.route import employee_router
@@ -18,6 +19,8 @@ app.include_router(company_router)
 app.include_router(company_auth_router)
 app.include_router(employee_router)
 app.include_router(type_company_router)
+app.include_router(address_router)
+app.include_router(address_auth_router)
 
 # middleware
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())

@@ -1,3 +1,4 @@
+from app.employee.constant import defaultType
 from app.position.model import *
 from datetime import datetime
 
@@ -21,7 +22,8 @@ class Employee(Base):
     position = relationship("Position")
 
     joined = Column(DateTime, nullable=True, default=datetime.now)
-    type = Column(String(25), nullable=True, default="guest")
+    id_type = Column(String(25), ForeignKey("type_employee.id"), nullable=True, default=defaultType)
+    type = relationship("TypeEmployee")
     end = Column(DateTime, nullable=True)
 
 
