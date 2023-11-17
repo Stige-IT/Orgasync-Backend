@@ -2,9 +2,7 @@ from datetime import datetime
 from typing import Union, Optional, List
 
 from pydantic import BaseModel
-from sqlalchemy.orm import relationship
 
-from app.company.response import CompanyResponse
 from app.position.response import PositionResponse
 from app.users.response import UserResponse
 
@@ -24,6 +22,14 @@ class EmployeesCompanyResponse(BaseModel):
 
 class ListEmployee(BaseModel):
     data: List[EmployeesCompanyResponse]
+
+    class Config:
+        from_attributes = True
+
+
+class TypeEmployeeResponse(BaseModel):
+    id: str
+    name: str
 
     class Config:
         from_attributes = True

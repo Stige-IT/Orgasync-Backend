@@ -12,6 +12,7 @@ class UserModel(Base):
     id = Column(String(100), primary_key=True, autoincrement=False)
     token_google = Column(TEXT, nullable=True)
     name = Column(String(100))
+    # gender = Column(String(10))
     image = Column(Text)
     email = Column(String(255), unique=True)
     password = deferred(Column(String(100)))

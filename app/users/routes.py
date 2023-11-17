@@ -9,6 +9,7 @@ from app.users.model import UserModel
 from app.users.response import UserResponse
 from app.users.schemas import CreateUserRequest, UserRequest
 from app.users.services import create_user_account, update_user_account
+import shutil
 
 router = APIRouter(
     prefix="/users",
@@ -59,7 +60,11 @@ async def update_user_data(
         db: Session = Depends(get_db),
 ):
     user_id = request.user.id
-    result = await update_user_account(name, email, user_id, image.filename, db)
+    destination = f"uploads/{image.filename}"
+    if image:
+        with open(destination, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+    result = await update_user_account(name, email, user_id, destination, db)
     return {
         "status": result,
         "message": "user profile succesfull updated"

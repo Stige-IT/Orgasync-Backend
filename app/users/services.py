@@ -37,7 +37,7 @@ async def create_user_account(data, db):
 
 
 async def update_user_account(name, email, id_user, image, db: Session):
-    user = db.query(UserModel).filter(UserModel.id == id_user).first()
+    user = db.query(UserModel).get(id_user)
     if not user:
         raise HTTPException(
             status_code=422, detail="Email is not already registered with us"

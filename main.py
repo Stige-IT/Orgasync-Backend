@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi_pagination import add_pagination
 from starlette.middleware.authentication import AuthenticationMiddleware
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.responses import FileResponse
 
 from app.address.route import address_router, address_auth_router
 from app.auth.route import auth_router
@@ -35,7 +36,15 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "Service Running..."}
+    return {
+        "message": "Service Running...",
+        "documentation": "/docs",
+    }
+
+
+@app.get("/uploads/{path}")
+async def get_file(path: str):
+    return FileResponse(f"uploads/{path}")
 
 
 add_pagination(app)
