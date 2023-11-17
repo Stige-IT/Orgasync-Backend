@@ -60,11 +60,10 @@ async def update_user_data(
         db: Session = Depends(get_db),
 ):
     user_id = request.user.id
-    destination = f"uploads/{image.filename}"
     if image:
-        with open(destination, "wb") as buffer:
+        with open(image.filename, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
-    result = await update_user_account(name, email, user_id, destination, db)
+    result = await update_user_account(name, email, user_id, image.filename, db)
     return {
         "status": result,
         "message": "user profile succesfull updated"

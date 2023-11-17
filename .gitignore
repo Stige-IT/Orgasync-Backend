@@ -1,4 +1,5 @@
 .idea
 alembic/versions/
 venv
+uploads/
 .env

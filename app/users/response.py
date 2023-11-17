@@ -15,7 +15,7 @@ class UserResponse(BaseModel):
     is_verified: bool
     registered_at: Union[None, datetime] = None
     # id_address: str
-    # address: Union[None, AddressResponse] = None
+    address: Union[None, AddressResponse] = None
 
     class Config:
         from_attributes = True

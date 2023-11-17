@@ -13,6 +13,7 @@ class Company(Base):
     token_google = Column(TEXT, nullable=True)
     name = Column(String(100))
     email = Column(String(100))
+    description = Column(TEXT)
     logo = Column(TEXT)
     cover = Column(TEXT)
     password = deferred(Column(String(100)))

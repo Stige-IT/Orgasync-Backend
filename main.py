@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi_pagination import add_pagination
 from starlette.middleware.authentication import AuthenticationMiddleware
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,6 +8,7 @@ from app.address.route import address_router, address_auth_router
 from app.auth.route import auth_router
 from app.company.route import company_router, company_auth_router
 from app.employee.route import employee_router
+from app.projects.company_project.route import company_project_router
 from app.type.route import type_company_router
 from core.security import JWTAuth
 from app.users.routes import router, user_router
@@ -22,6 +23,7 @@ app.include_router(employee_router)
 app.include_router(type_company_router)
 app.include_router(address_router)
 app.include_router(address_auth_router)
+app.include_router(company_project_router)
 
 # middleware
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())
@@ -44,7 +46,10 @@ async def root():
 
 @app.get("/uploads/{path}")
 async def get_file(path: str):
-    return FileResponse(f"uploads/{path}")
+    try:
+        return FileResponse(f"uploads/{path}")
+    except Exception as e:
+        return HTTPException(status_code=404, detail="File not found")
 
 
 add_pagination(app)
