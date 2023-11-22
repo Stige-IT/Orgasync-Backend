@@ -9,6 +9,7 @@ from app.auth.route import auth_router
 from app.company.route import company_router, company_auth_router
 from app.employee.route import employee_router
 from app.projects.company_project.route import company_project_router
+from app.projects.employee_project.route import employee_project_router
 from app.type.route import type_company_router
 from core.security import JWTAuth
 from app.users.routes import router, user_router
@@ -24,6 +25,7 @@ app.include_router(type_company_router)
 app.include_router(address_router)
 app.include_router(address_auth_router)
 app.include_router(company_project_router)
+app.include_router(employee_project_router)
 
 # middleware
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())
