@@ -1,20 +1,46 @@
+import uuid
 from fastapi import APIRouter, Depends, status, Request
 from fastapi_pagination import Page, paginate
 from sqlalchemy.orm import Session
 
 from app.projects.company_project.model import CompanyProject
 from app.projects.company_project.response import CompanyProjectResponse
+from app.projects.company_project.schema import EmployeeProjectRequest
+from app.projects.employee_project.model import EmployeeProject
 from core.database import get_db
 from core.security import oauth2_scheme
 
 company_project_router = APIRouter(
-    prefix="/company/project",
-    tags=["Project"],
-    dependencies=[Depends(oauth2_scheme)]
+    prefix="/company/project", tags=["Project"], dependencies=[Depends(oauth2_scheme)]
 )
 
 
-@company_project_router.get("", status_code=status.HTTP_200_OK, response_model=Page[CompanyProjectResponse])
+@company_project_router.get(
+    "", status_code=status.HTTP_200_OK, response_model=Page[CompanyProjectResponse]
+)
 async def get_project(request: Request, db: Session = Depends(get_db)):
-    company_project = db.query(CompanyProject).filter(CompanyProject.id_company == request.user.id).all()
+    company_project = (
+        db.query(CompanyProject)
+        .filter(CompanyProject.id_company == request.user.id)
+        .all()
+    )
     return paginate(company_project)
+
+
+# add employee to company project
+@company_project_router.post("/add-employee", status_code=status.HTTP_201_CREATED)
+async def add_employee_to_project(
+    project_id: str,
+    employessRequest: EmployeeProjectRequest,
+    db: Session = Depends(get_db),
+):
+    for id_employee in employessRequest.employee_id:
+        employee_project = EmployeeProject(
+            id=uuid.uuid4(),
+            id_employee=id_employee,
+            id_project=project_id,
+        )
+        db.add(employee_project)
+        db.commit()
+        db.refresh(employee_project)
+    return {"message": "Employee has been added to project."}

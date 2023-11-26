@@ -1,3 +1,4 @@
+from typing import Optional
 import uuid
 from datetime import datetime
 
@@ -36,7 +37,9 @@ async def create_user_account(data, db):
     return new_user
 
 
-async def update_user_account(name, email, id_user, image, db: Session):
+async def update_user_account(
+    name, email, id_user, db: Session, filename: Optional[str] = None
+):
     user = db.query(UserModel).get(id_user)
     if not user:
         raise HTTPException(
@@ -44,6 +47,7 @@ async def update_user_account(name, email, id_user, image, db: Session):
         )
     user.name = name
     user.email = email
-    user.image = image
+    if filename:
+        user.image = filename
     db.commit()
     return True

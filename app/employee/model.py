@@ -2,7 +2,7 @@ from app.employee.constant import defaultType
 from app.position.model import *
 from datetime import datetime
 
-from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy import Column, String, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
 from app.position.constant import defaulIdPosition
@@ -31,3 +31,4 @@ class TypeEmployee(Base):
     __tablename__ = "type_employee"
     id = Column(String(100), primary_key=True, autoincrement=False)
     name = Column(String(25))
+    level = Column(Integer, nullable=True)

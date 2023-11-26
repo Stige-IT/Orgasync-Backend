@@ -11,7 +11,7 @@ class EmployeesCompanyResponse(BaseModel):
     id: str
     joined: Union[None, datetime] = None
     end: Union[None, datetime] = None
-    type: str
+    # type: str
     # company: CompanyResponse
     position: Union[None, PositionResponse] = None
     user: UserResponse

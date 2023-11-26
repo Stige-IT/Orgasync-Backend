@@ -27,9 +27,7 @@ company_router = APIRouter(
 )
 
 company_auth_router = APIRouter(
-    prefix="/company/me",
-    tags=["Company"],
-    dependencies=[Depends(oauth2_scheme)]
+    prefix="/company/me", tags=["Company"], dependencies=[Depends(oauth2_scheme)]
 )
 
 
@@ -44,7 +42,9 @@ async def get_company(db: Session = Depends(get_db)):
     return {"data": company}
 
 
-@company_auth_router.get("", status_code=status.HTTP_200_OK, response_model=Page[CompanyMeResponse])
+@company_auth_router.get(
+    "", status_code=status.HTTP_200_OK, response_model=Page[CompanyMeResponse]
+)
 async def get_company(request: Request, db: Session = Depends(get_db)):
     company = db.query(Employee).filter(Employee.id_user == request.user.id).all()
     return paginate(company)
@@ -98,6 +98,15 @@ async def check_name(name: str, db: Session = Depends(get_db)):
 
 @company_auth_router.post("/join", status_code=status.HTTP_201_CREATED)
 async def join_company(request: Request, code: str, db: Session = Depends(get_db)):
+    company = db.query(Company).filter(Company.code == code).first()
+    if not company:
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "message": "Company not found",
+                "code": "not found",
+            },
+        )
     id_user = request.user.id
     user_registered = db.query(Employee).filter(Employee.id_user == id_user).first()
     company_registered = db.query(Company).filter(Company.code == code).first()

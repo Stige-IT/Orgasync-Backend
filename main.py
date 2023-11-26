@@ -4,6 +4,7 @@ from starlette.middleware.authentication import AuthenticationMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
 
+from app.projects.project.route import project_router
 from app.address.route import address_router, address_auth_router
 from app.auth.route import auth_router
 from app.company.route import company_router, company_auth_router
@@ -14,7 +15,11 @@ from app.type.route import type_company_router
 from core.security import JWTAuth
 from app.users.routes import router, user_router
 
-app = FastAPI(version="0.0.1", title="Orgasync Rest API")
+app = FastAPI(
+    version="0.0.1",
+    title="Orgasync Rest API",
+    description="Orgasync Rest API Documentation",
+)
 app.include_router(router)
 app.include_router(user_router)
 app.include_router(auth_router)
@@ -26,6 +31,7 @@ app.include_router(address_router)
 app.include_router(address_auth_router)
 app.include_router(company_project_router)
 app.include_router(employee_project_router)
+app.include_router(project_router)
 
 # middleware
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())

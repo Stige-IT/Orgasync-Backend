@@ -1,5 +1,16 @@
+import os
 from typing import Annotated, Optional
-from fastapi import APIRouter, status, Depends, HTTPException, Request, UploadFile, File, Form
+from fastapi import (
+    APIRouter,
+    status,
+    Depends,
+    HTTPException,
+    Request,
+    UploadFile,
+    File,
+    Form,
+)
+import uuid
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
@@ -12,16 +23,14 @@ from app.users.services import create_user_account, update_user_account
 import shutil
 
 router = APIRouter(
-    prefix="/users",
-    tags=["Users"],
-    responses={400: {"description": "Not Found"}}
+    prefix="/users", tags=["Users"], responses={400: {"description": "Not Found"}}
 )
 
 user_router = APIRouter(
     prefix="/me",
     tags=["Users"],
     responses={404: {"description": "Not Found"}},
-    dependencies=[Depends(oauth2_scheme)]
+    dependencies=[Depends(oauth2_scheme)],
 )
 
 
@@ -46,25 +55,28 @@ async def create_user(data: CreateUserRequest, db: Session = Depends(get_db)):
     return JSONResponse(content=payload)
 
 
-@user_router.get('', status_code=status.HTTP_200_OK, response_model=UserResponse)
+@user_router.get("", status_code=status.HTTP_200_OK, response_model=UserResponse)
 def get_user_detail(request: Request):
     return request.user
 
 
-@user_router.put('', status_code=status.HTTP_200_OK)
+@user_router.put("", status_code=status.HTTP_200_OK)
 async def update_user_data(
-        request: Request,
-        name: Annotated[str, Form()] = None,
-        email: Annotated[str, Form()] = None,
-        image: Optional[UploadFile] = None,
-        db: Session = Depends(get_db),
+    request: Request,
+    name: Annotated[str, Form()] = None,
+    email: Annotated[str, Form()] = None,
+    image: Optional[UploadFile] = None,
+    db: Session = Depends(get_db),
 ):
     user_id = request.user.id
-    if image:
-        with open(image.filename, "wb") as buffer:
+    if image and image is not None:
+        if request.user.image is not None:
+            os.remove(f"uploads/{request.user.image}")
+        random_string = str(uuid.uuid4())
+        filename = f"{random_string}-{image.filename}"
+        with open(f"uploads/{filename}", "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
-    result = await update_user_account(name, email, user_id, image.filename, db)
-    return {
-        "status": result,
-        "message": "user profile succesfull updated"
-    }
+        await update_user_account(name, email, user_id, db, filename)
+    else:
+        await update_user_account(name, email, user_id, db)
+    return {"message": "user profile succesfull updated"}
