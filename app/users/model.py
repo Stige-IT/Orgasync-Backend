@@ -3,6 +3,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import deferred, relationship
 
+from app.users.enums import RoleUser
 from core.database import Base
 from sqlalchemy import Column, String, Boolean, DateTime, func, Text, TEXT, ForeignKey
 
@@ -30,5 +31,5 @@ class UserModel(Base):
     registered_at = Column(DateTime, nullable=True, default=None)
     updated_at = Column(DateTime, nullable=True, default=None, onupdate=datetime.now)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
-    id_role = Column(String(100), ForeignKey("role.id"), nullable=True)
+    id_role = Column(String(100), ForeignKey("role.id"), nullable=True, default=RoleUser.USER.value)
     role = relationship("Role", backref="users", lazy="joined")

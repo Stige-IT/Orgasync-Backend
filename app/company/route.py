@@ -11,6 +11,8 @@ from app.auth.services import get_token
 from app.company.model import Company
 from app.company.response import CompanyMeResponse
 from app.company.schema import CompanyRequest
+from app.company.services import join_company_user
+from app.employee.enums import TypeEmployeeStatus
 from app.employee.model import Employee
 from app.position.constant import defaulIdPosition
 from core.database import get_db
@@ -31,11 +33,6 @@ company_auth_router = APIRouter(
 )
 
 
-@company_router.post("/login", status_code=status.HTTP_200_OK)
-async def login_company(request: LoginRequest, db: Session = Depends(get_db)):
-    return await get_token(data=request, db=db, is_form=False)
-
-
 @company_router.get("", status_code=status.HTTP_200_OK)
 async def get_company(db: Session = Depends(get_db)):
     company = db.query(Company).all()
@@ -50,50 +47,22 @@ async def get_company(request: Request, db: Session = Depends(get_db)):
     return paginate(company)
 
 
-@company_router.post("/register", status_code=status.HTTP_201_CREATED)
-async def create_company(request: CompanyRequest, db: Session = Depends(get_db)):
-    company = db.query(Company).filter(Company.email == request.email).first()
-    if company:
-        raise HTTPException(
-            status_code=422,
-            detail={
-                "message": "Email is already registered with us",
-                "email": "registered",
-            },
-        )
-
+@company_auth_router.post("/create", status_code=status.HTTP_201_CREATED)
+async def create_company(request: Request, company_request: CompanyRequest, db: Session = Depends(get_db)):
     code = uuid.uuid4()
     new_company = Company(
         id=f"com-{uuid.uuid4()}",
-        name=request.name,
-        email=request.email,
-        password=get_password_hash(request.password),
+        id_user=request.user.id,
+        name=company_request.name,
         code=str(code)[:7],
-        type=request.type,
-        size=request.size,
-        is_active=True,
+        id_type_company=company_request.type,
+        size=company_request.size,
     )
     db.add(new_company)
     db.commit()
     db.refresh(new_company)
+    await join_company_user(db, str(code)[:7], request.user.id, TypeEmployeeStatus.OWNER.value)
     return {"message": "company has registered"}
-
-
-# check name if exist
-@company_router.get("/check-name/{name}", status_code=status.HTTP_200_OK)
-async def check_name(name: str, db: Session = Depends(get_db)):
-    company = db.query(Company).filter(Company.name == name).first()
-    if company:
-        raise HTTPException(
-            status_code=422,
-            detail={
-                "message": "Name is already registered with us",
-                "name": "registered",
-            },
-        )
-    return JSONResponse(
-        content={"message": "Name is available"}, status_code=status.HTTP_200_OK
-    )
 
 
 @company_auth_router.post("/join", status_code=status.HTTP_201_CREATED)
@@ -108,16 +77,5 @@ async def join_company(request: Request, code: str, db: Session = Depends(get_db
             },
         )
     id_user = request.user.id
-    user_registered = db.query(Employee).filter(Employee.id_user == id_user).first()
-    company_registered = db.query(Company).filter(Company.code == code).first()
-    if user_registered and company_registered.id == user_registered.id_company:
-        return {"message": "user already joined"}
-    new_employee = Employee(
-        id=uuid.uuid4(),
-        id_user=id_user,
-        id_company=company_registered.id,
-    )
-    db.add(new_employee)
-    db.commit()
-    db.refresh(new_employee)
+    await join_company_user(db, code, id_user)
     return {"message": "user has joined"}
