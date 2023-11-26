@@ -8,7 +8,7 @@ from fastapi import (
     Request,
     UploadFile,
     File,
-    Form,
+    Form, Query,
 )
 import uuid
 from sqlalchemy.orm import Session
@@ -55,6 +55,16 @@ async def create_user(data: CreateUserRequest, db: Session = Depends(get_db)):
     return JSONResponse(content=payload)
 
 
+# search user
+@router.get("/search/{query}", status_code=status.HTTP_200_OK)
+async def search_user(query: Annotated[str, None] = None, db: Session = Depends(get_db)):
+    if query is None:
+        users = db.query(UserModel).all()
+        return {"data": users}
+    users = db.query(UserModel).filter(UserModel.email.contains(query)).all()
+    return {"data": users}
+
+
 @user_router.get("", status_code=status.HTTP_200_OK, response_model=UserResponse)
 def get_user_detail(request: Request):
     return request.user
@@ -62,11 +72,11 @@ def get_user_detail(request: Request):
 
 @user_router.put("", status_code=status.HTTP_200_OK)
 async def update_user_data(
-    request: Request,
-    name: Annotated[str, Form()] = None,
-    email: Annotated[str, Form()] = None,
-    image: Optional[UploadFile] = None,
-    db: Session = Depends(get_db),
+        request: Request,
+        name: Annotated[str, Form()] = None,
+        email: Annotated[str, Form()] = None,
+        image: Optional[UploadFile] = None,
+        db: Session = Depends(get_db),
 ):
     user_id = request.user.id
     if image and image is not None:

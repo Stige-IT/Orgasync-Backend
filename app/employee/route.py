@@ -40,9 +40,8 @@ async def create_employee(request: Request, employee: EmployeeCreateRequest, db:
     return employee
 
 
-@employee_router.get("", status_code=status.HTTP_200_OK, response_model=Page[EmployeesCompanyResponse])
-async def get_employee(request: Request, db: Session = Depends(get_db)):
-    company_id = request.user.id
+@employee_router.get("/{company_id}", status_code=status.HTTP_200_OK, response_model=Page[EmployeesCompanyResponse])
+async def get_employee(company_id : str, db: Session = Depends(get_db)):
     employees = db.query(Employee).filter(Employee.id_company == company_id).all()
     return paginate(employees)
 
@@ -55,12 +54,12 @@ async def get_employee(id: str, db: Session = Depends(get_db)):
 
 
 # search employee with query in nested model Employee inside User
-@employee_router.post("/search/{query}", status_code=status.HTTP_200_OK, response_model=Page[EmployeesCompanyResponse])
-async def search_employee(request: Request, query: Optional[str] = "", db: Session = Depends(get_db)):
+@employee_router.get("", status_code=status.HTTP_200_OK, response_model=Page[EmployeesCompanyResponse])
+async def search_employee(query: Optional[str] = "", db: Session = Depends(get_db)):
+    print(query)
     employees = db.query(Employee). \
         join(UserModel). \
-        filter(UserModel.name.contains(query), UserModel.email.contains(query)). \
-        filter(Employee.id_company == request.user.id). \
+        filter(UserModel.email.contains(query)). \
         all()
     return paginate(employees)
 
