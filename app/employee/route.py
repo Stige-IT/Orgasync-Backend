@@ -17,14 +17,18 @@ employee_router = APIRouter(
     prefix="/employee",
     tags=["Employee"],
     responses={400: {"description": "Not Found"}},
-    dependencies=[Depends(oauth2_scheme)]
+    dependencies=[Depends(oauth2_scheme)],
 )
 
 
 # create new Employee
 @employee_router.post("", status_code=status.HTTP_201_CREATED)
-async def create_employee(request: Request, employee: EmployeeCreateRequest, db: Session = Depends(get_db)):
-    user_registered = db.query(Employee).filter(Employee.id_user == employee.id_user).first()
+async def create_employee(
+    request: Request, employee: EmployeeCreateRequest, db: Session = Depends(get_db)
+):
+    user_registered = (
+        db.query(Employee).filter(Employee.id_user == employee.id_user).first()
+    )
     if user_registered:
         return {"message": "user already joined"}
     employee = Employee(
@@ -40,33 +44,44 @@ async def create_employee(request: Request, employee: EmployeeCreateRequest, db:
     return employee
 
 
-@employee_router.get("/{company_id}", status_code=status.HTTP_200_OK, response_model=Page[EmployeesCompanyResponse])
-async def get_employee(company_id : str, db: Session = Depends(get_db)):
+@employee_router.get(
+    "/{company_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=Page[EmployeesCompanyResponse],
+)
+async def get_employee(company_id: str, db: Session = Depends(get_db)):
     employees = db.query(Employee).filter(Employee.id_company == company_id).all()
     return paginate(employees)
 
 
 # detail employee
-@employee_router.get("/{id}", status_code=status.HTTP_200_OK, response_model=EmployeesCompanyResponse)
+@employee_router.get(
+    "/{id}", status_code=status.HTTP_200_OK, response_model=EmployeesCompanyResponse
+)
 async def get_employee(id: str, db: Session = Depends(get_db)):
     employee = db.query(Employee).filter(Employee.id == id).first()
     return employee
 
 
 # search employee with query in nested model Employee inside User
-@employee_router.get("", status_code=status.HTTP_200_OK, response_model=Page[EmployeesCompanyResponse])
+@employee_router.get(
+    "/search/{query}",
+    status_code=status.HTTP_200_OK,
+    response_model=Page[EmployeesCompanyResponse],
+)
 async def search_employee(query: Optional[str] = "", db: Session = Depends(get_db)):
     print(query)
-    employees = db.query(Employee). \
-        join(UserModel). \
-        filter(UserModel.email.contains(query)). \
-        all()
+    employees = (
+        db.query(Employee).join(UserModel).filter(UserModel.email.contains(query)).all()
+    )
     return paginate(employees)
 
 
 # update type employee
 @employee_router.put("/{id}", status_code=status.HTTP_200_OK)
-async def update_employee(id: str, employee: EmployeeCreateRequest, db: Session = Depends(get_db)):
+async def update_employee(
+    id: str, employee: EmployeeCreateRequest, db: Session = Depends(get_db)
+):
     result = db.query(Employee).filter(Employee.id == id).first()
     result.type = employee.type
     db.commit()

@@ -37,6 +37,8 @@ class AddressCountry(Base):
     __tablename__ = "address_country"
     id = Column(Integer, primary_key=True, autoincrement=False)
     name = Column(String(100))
+    code1 = Column(String(100))
+    code2 = Column(String(100))
 
 
 class Address(Base):
@@ -54,7 +56,7 @@ class Address(Base):
     country_id = Column(Integer, ForeignKey("address_country.id"), nullable=True)
     country = relationship("AddressCountry", backref="address", lazy="joined")
     zip_code = Column(Integer, nullable=True)
-    lat = Column(String(100))
-    lng = Column(String(100))
+    lat = Column(String(100), nullable=True)
+    lng = Column(String(100), nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=True, default=None, onupdate=datetime.now)

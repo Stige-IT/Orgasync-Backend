@@ -8,17 +8,18 @@ from fastapi import (
     Request,
     UploadFile,
     File,
-    Form, Query,
+    Form,
+    Query,
 )
 import uuid
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from core.database import get_db
-from core.security import oauth2_scheme
+from core.security import get_password_hash, oauth2_scheme, verify_password
 from app.users.model import UserModel
 from app.users.response import UserResponse
-from app.users.schemas import CreateUserRequest, UserRequest
+from app.users.schemas import CreateUserRequest, PasswordRequest, UserRequest
 from app.users.services import create_user_account, update_user_account
 import shutil
 
@@ -57,7 +58,9 @@ async def create_user(data: CreateUserRequest, db: Session = Depends(get_db)):
 
 # search user
 @router.get("/search/{query}", status_code=status.HTTP_200_OK)
-async def search_user(query: Annotated[str, None] = None, db: Session = Depends(get_db)):
+async def search_user(
+    query: Annotated[str, None] = None, db: Session = Depends(get_db)
+):
     if query is None:
         users = db.query(UserModel).all()
         return {"data": users}
@@ -72,11 +75,11 @@ def get_user_detail(request: Request):
 
 @user_router.put("", status_code=status.HTTP_200_OK)
 async def update_user_data(
-        request: Request,
-        name: Annotated[str, Form()] = None,
-        email: Annotated[str, Form()] = None,
-        image: Optional[UploadFile] = None,
-        db: Session = Depends(get_db),
+    request: Request,
+    name: Annotated[str, Form()] = None,
+    email: Annotated[str, Form()] = None,
+    image: Optional[UploadFile] = None,
+    db: Session = Depends(get_db),
 ):
     user_id = request.user.id
     if image and image is not None:
@@ -90,3 +93,21 @@ async def update_user_data(
     else:
         await update_user_account(name, email, user_id, db)
     return {"message": "user profile succesfull updated"}
+
+
+# edit user password
+@user_router.put("/change-password", status_code=status.HTTP_200_OK)
+async def update_user_password(
+    request: Request,
+    passwordRequest: PasswordRequest,
+    db: Session = Depends(get_db),
+):
+    user_id = request.user.id
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not verify_password(passwordRequest.password, user.password):
+        raise HTTPException(status_code=401, detail="Password not match")
+    user.password = get_password_hash(passwordRequest.new_password)
+    db.commit()
+    return {"message": "user password succesfull updated"}

@@ -1,4 +1,7 @@
 import uuid
+from datetime import datetime
+from typing import List
+
 from fastapi_pagination.utils import disable_installed_extensions_check
 
 from fastapi import APIRouter, status, Depends, HTTPException, Request
@@ -14,7 +17,9 @@ from app.company.schema import CompanyRequest
 from app.company.services import join_company_user
 from app.employee.enums import TypeEmployeeStatus
 from app.employee.model import Employee
+from app.employee.response import EmployeesCompanyResponse
 from app.position.constant import defaulIdPosition
+from app.users.model import UserModel
 from core.database import get_db
 from core.security import get_password_hash, oauth2_scheme
 
@@ -48,7 +53,9 @@ async def get_company(request: Request, db: Session = Depends(get_db)):
 
 
 @company_auth_router.post("/create", status_code=status.HTTP_201_CREATED)
-async def create_company(request: Request, company_request: CompanyRequest, db: Session = Depends(get_db)):
+async def create_company(
+    request: Request, company_request: CompanyRequest, db: Session = Depends(get_db)
+):
     code = uuid.uuid4()
     new_company = Company(
         id=f"com-{uuid.uuid4()}",
@@ -61,7 +68,9 @@ async def create_company(request: Request, company_request: CompanyRequest, db: 
     db.add(new_company)
     db.commit()
     db.refresh(new_company)
-    await join_company_user(db, str(code)[:7], request.user.id, TypeEmployeeStatus.OWNER.value)
+    await join_company_user(
+        db, str(code)[:7], request.user.id, TypeEmployeeStatus.OWNER.value
+    )
     return {"message": "company has registered"}
 
 
@@ -79,3 +88,49 @@ async def join_company(request: Request, code: str, db: Session = Depends(get_db
     id_user = request.user.id
     await join_company_user(db, code, id_user)
     return {"message": "user has joined"}
+
+
+# add employee with email
+@company_auth_router.post("/add-employee", status_code=status.HTTP_201_CREATED)
+async def add_employee(
+    request: Request, emails: List[str], db: Session = Depends(get_db)
+):
+    company = db.query(Company).filter(Company.id_user == request.user.id).first()
+    for email in emails:
+        user = db.query(UserModel).filter(UserModel.email == email).first()
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "message": "User not found",
+                    "code": "not found",
+                },
+            )
+        user_registered = (
+            db.query(Employee).join(UserModel).filter(UserModel.email == email).first()
+        )
+
+        if user_registered:
+            raise HTTPException(401)
+        employee = Employee(
+            id=str(uuid.uuid4()),
+            id_user=user.id,
+            id_company=company.id,
+            joined=datetime.now(),
+        )
+        db.add(employee)
+        db.commit()
+        db.refresh(employee)
+    return {"message": "users has joined"}
+
+
+# get employee by company id
+@company_auth_router.get(
+    "/employee",
+    status_code=status.HTTP_200_OK,
+    response_model=Page[EmployeesCompanyResponse],
+)
+async def get_employee(request: Request, db: Session = Depends(get_db)):
+    company = db.query(Company).filter(Company.id_user == request.user.id).first()
+    employees = db.query(Employee).filter(Employee.id_company == company.id).all()
+    return paginate(employees)

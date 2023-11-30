@@ -12,6 +12,7 @@ from app.users.response import UserResponse
 
 class CompanyResponse(BaseModel):
     id: str
+    name: str
     description: Union[None, str] = None
     cover: Union[None, str] = None
     code: str

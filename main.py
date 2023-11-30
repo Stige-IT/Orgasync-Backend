@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
 
 from app.projects.project.route import project_router
+from app.position.routes import position_router
 from app.address.route import address_router, address_auth_router
 from app.auth.route import auth_router
 from app.company.route import company_router, company_auth_router
@@ -27,6 +28,7 @@ app.include_router(company_router)
 app.include_router(company_auth_router)
 app.include_router(employee_router)
 app.include_router(type_company_router)
+app.include_router(position_router)
 app.include_router(address_router)
 app.include_router(address_auth_router)
 app.include_router(company_project_router)
