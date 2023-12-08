@@ -25,19 +25,10 @@ async def get_token(data, db: Session, is_form: bool):
         user: UserModel = (
             db.query(UserModel).filter(UserModel.email == data.username).first()
         )
-        if not user:
-            user: Company = (
-                db.query(Company).filter(Company.email == data.username).first()
-            )
     else:
         user: UserModel = (
             db.query(UserModel).filter(UserModel.email == data.email).first()
         )
-        if not user:
-            user: Company = (
-                db.query(Company).filter(Company.email == data.email).first()
-            )
-
     if not user:
         raise HTTPException(
             status_code=404,

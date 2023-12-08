@@ -6,8 +6,6 @@ from pydantic import BaseModel
 class LocationResponse(BaseModel):
     id: int
     name: str
-    code1: Union[None, str] = None
-    code2: Union[None, str] = None
 
     class Config:
         from_attributes = True

@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Optional, List
 
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi_pagination import Page, paginate
 from sqlalchemy.orm import Session
 
@@ -93,6 +93,8 @@ async def update_employee(
 @employee_router.delete("/{id}", status_code=status.HTTP_200_OK)
 async def delete_employee(id: str, db: Session = Depends(get_db)):
     result = db.query(Employee).filter(Employee.id == id).first()
+    if not result:
+        raise HTTPException(status_code=404, detail="Employee not found")
     db.delete(result)
     db.commit()
     return {"message": "deleted"}

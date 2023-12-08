@@ -69,7 +69,10 @@ async def search_user(
 
 
 @user_router.get("", status_code=status.HTTP_200_OK, response_model=UserResponse)
-def get_user_detail(request: Request):
+def get_user_detail(request: Request, db: Session = Depends(get_db)):
+    user = db.query(UserModel).filter(UserModel.id == request.user.id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     return request.user
 
 

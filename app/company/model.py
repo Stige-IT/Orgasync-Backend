@@ -4,14 +4,23 @@ from datetime import datetime
 from sqlalchemy.orm import deferred, relationship
 
 from core.database import Base
-from sqlalchemy import Column, Integer, String, DateTime, func, TEXT, Boolean, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    DateTime,
+    func,
+    TEXT,
+    Boolean,
+    ForeignKey,
+)
 
 
 class Company(Base):
     __tablename__ = "company"
     id = Column(String(100), primary_key=True, autoincrement=False)
     id_user = Column(String(100), ForeignKey("users.id"))
-    user = relationship("UserModel", backref="company", lazy="joined")
+    owner = relationship("UserModel", backref="company", lazy="joined")
     name = Column(String(100))
     logo = Column(TEXT, nullable=True)
     code = Column(String(100), nullable=True)
