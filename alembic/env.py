@@ -2,13 +2,27 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from core.database import Base
 
 from alembic import context
 from core.config import get_settings
+from core.database import Base
 
 # Import all models
-from users.model import *
+
+from app.address.model import *
+from app.users.model import *
+from app.position.model import *
+from app.company.model import *
+from app.employee.model import *
+from app.projects.status.model import *
+from app.projects.company_project.model import *
+from app.projects.employee_project.model import *
+from app.projects.project.model import *
+from app.projects.task.model import *
+from app.projects.employee_project_task.model import *
+from app.type.model import *
+from app.auth.model import *
+
 
 settings = get_settings()
 
