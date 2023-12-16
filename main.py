@@ -5,11 +5,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
 
 from app.projects.project.route import project_router
+from app.position.routes import position_router
 from app.address.route import address_router, address_auth_router
 from app.auth.route import auth_router
 from app.company.route import company_router, company_auth_router
 from app.employee.route import employee_router
 from app.projects.company_project.route import company_project_router
+from app.projects.employee_company_project.route import employee_company_project
 from app.projects.employee_project.route import employee_project_router
 from app.type.route import type_company_router
 from core.security import JWTAuth
@@ -27,9 +29,11 @@ app.include_router(company_router)
 app.include_router(company_auth_router)
 app.include_router(employee_router)
 app.include_router(type_company_router)
+app.include_router(position_router)
 app.include_router(address_router)
 app.include_router(address_auth_router)
 app.include_router(company_project_router)
+app.include_router(employee_company_project)
 app.include_router(employee_project_router)
 app.include_router(project_router)
 

@@ -10,3 +10,8 @@ class CreateUserRequest(BaseModel):
 class UserRequest(BaseModel):
     name: str
     email: EmailStr
+
+
+class PasswordRequest(BaseModel):
+    password: str
+    new_password: str
