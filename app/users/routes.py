@@ -41,8 +41,8 @@ async def get_users(db: Session = Depends(get_db)):
     return {"data": users}
 
 
-@router.get("/{id_user}", status_code=status.HTTP_200_OK)
-async def get_detail_user(id_user: int, db: Session = Depends(get_db)):
+@router.get("/show/{id_user}", status_code=status.HTTP_200_OK)
+async def get_detail_user(id_user: str, db: Session = Depends(get_db)):
     user = db.query(UserModel).filter(UserModel.id == id_user).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -57,14 +57,19 @@ async def create_user(data: CreateUserRequest, db: Session = Depends(get_db)):
 
 
 # search user
-@router.get("/search/{query}", status_code=status.HTTP_200_OK)
+@router.get("/search", status_code=status.HTTP_200_OK)
 async def search_user(
     query: Annotated[str, None] = None, db: Session = Depends(get_db)
 ):
     if query is None:
         users = db.query(UserModel).all()
         return {"data": users}
-    users = db.query(UserModel).filter(UserModel.email.contains(query)).all()
+    users = (
+        db.query(UserModel)
+        .filter(UserModel.is_verified == True)
+        .filter(UserModel.email.contains(query))
+        .all()
+    )
     return {"data": users}
 
 

@@ -1,12 +1,12 @@
 import uuid
 from datetime import datetime
-from typing import Optional, List
+from typing import Annotated, Optional, List
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi_pagination import Page, paginate
 from sqlalchemy.orm import Session
 
-from app.employee.model import Employee
+from app.employee.model import Employee, TypeEmployee
 from app.employee.response import EmployeesCompanyResponse
 from app.employee.schema import EmployeeCreateRequest
 from app.users.model import UserModel
@@ -65,28 +65,41 @@ async def get_employee(id: str, db: Session = Depends(get_db)):
 
 # search employee with query in nested model Employee inside User
 @employee_router.get(
-    "/search/{query}",
+    "/search/{id_company}",
     status_code=status.HTTP_200_OK,
     response_model=Page[EmployeesCompanyResponse],
 )
-async def search_employee(query: Optional[str] = "", db: Session = Depends(get_db)):
-    print(query)
+async def search_employee(
+    id_company: str,
+    query: Optional[str] = "",
+    db: Session = Depends(get_db),
+):
     employees = (
-        db.query(Employee).join(UserModel).filter(UserModel.email.contains(query)).all()
+        db.query(Employee)
+        .join(UserModel)
+        .filter(Employee.id_company == id_company)
+        .filter((UserModel.email.contains(query)) | (UserModel.name.contains(query)))
+        .all()
     )
+    for employee in employees:
+        print(employee.user.email)
     return paginate(employees)
 
 
 # update type employee
 @employee_router.put("/{id}", status_code=status.HTTP_200_OK)
 async def update_employee(
-    id: str, employee: EmployeeCreateRequest, db: Session = Depends(get_db)
+    id: str,
+    id_type_employee: Annotated[str, Form()] = None,
+    db: Session = Depends(get_db),
 ):
     result = db.query(Employee).filter(Employee.id == id).first()
-    result.type = employee.type
+    result.id_type = id_type_employee
     db.commit()
-    db.refresh(employee)
-    return employee
+    return {
+        "message": "updated",
+        "data": {"id": result.id, "id_type_employee": result.id_type},
+    }
 
 
 # delete employee
@@ -98,3 +111,21 @@ async def delete_employee(id: str, db: Session = Depends(get_db)):
     db.delete(result)
     db.commit()
     return {"message": "deleted"}
+
+
+# Type Employee
+# get type employee
+@employee_router.get("/show/type", status_code=status.HTTP_200_OK)
+async def get_type_employee(db: Session = Depends(get_db)):
+    employees = db.query(TypeEmployee).order_by(TypeEmployee.level).all()
+    return employees
+
+
+# create type employee
+@employee_router.post("/create/type", status_code=status.HTTP_201_CREATED)
+async def create_type_employee(name: str, level: int, db: Session = Depends(get_db)):
+    type_employee = TypeEmployee(id=uuid.uuid4(), name=name, level=level)
+    db.add(type_employee)
+    db.commit()
+    db.refresh(type_employee)
+    return type_employee

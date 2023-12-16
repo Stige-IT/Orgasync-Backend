@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, Depends, status, Request
 from fastapi_pagination import Page, paginate
 from sqlalchemy.orm import Session
@@ -32,3 +33,42 @@ async def get_project(request: Request, db: Session = Depends(get_db)):
                 print(project.id_project)
                 result.append(project)
     return paginate(result)
+
+
+@employee_project_router.get("/{id_employee_project}", status_code=status.HTTP_200_OK)
+async def get_detail_project(id_employee_project: str, db: Session = Depends(get_db)):
+    project = (
+        db.query(EmployeeProject)
+        .filter(EmployeeProject.id == id_employee_project)
+        .first()
+    )
+    return project
+
+
+# create employee project
+@employee_project_router.post("", status_code=status.HTTP_201_CREATED)
+async def create_project(
+    id_employee: str,
+    id_project: str,
+    db: Session = Depends(get_db),
+):
+    project = EmployeeProject(
+        id=uuid.uuid4(),
+        id_employee=id_employee,
+        id_project=id_project,
+    )
+    db.add(project)
+    db.commit()
+    db.refresh(project)
+    return {"message": "Project has been created."}
+
+
+# delete employee project
+@employee_project_router.delete("/{id}", status_code=status.HTTP_200_OK)
+async def delete_project(id: str, db: Session = Depends(get_db)):
+    project = db.query(EmployeeProject).filter(EmployeeProject.id == id).first()
+    if project:
+        db.delete(project)
+        db.commit()
+        return {"message": "Project has been deleted."}
+    return {"message": "Project not found."}

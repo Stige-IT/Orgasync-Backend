@@ -56,6 +56,28 @@ async def create_project(
     return {"message": "Project has been created."}
 
 
+# detail company project
+@company_project_router.get(
+    "/{id}", status_code=status.HTTP_200_OK, response_model=CompanyProjectResponse
+)
+async def detail_project(id: str, db: Session = Depends(get_db)):
+    project = db.query(CompanyProject).filter(CompanyProject.id == id).first()
+    if project:
+        return project
+    return {"message": "Project not found."}
+
+
+# delete company project
+@company_project_router.delete("/{id}", status_code=status.HTTP_200_OK)
+async def delete_project(id: str, db: Session = Depends(get_db)):
+    project = db.query(CompanyProject).filter(CompanyProject.id == id).first()
+    if project:
+        db.delete(project)
+        db.commit()
+        return {"message": "Project has been deleted."}
+    return {"message": "Project not found."}
+
+
 # add employee to company project
 @company_project_router.post("/add-employee", status_code=status.HTTP_201_CREATED)
 async def add_employee_to_project(

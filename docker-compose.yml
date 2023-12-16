@@ -1,0 +1,14 @@
+version: '1'
+
+services:
+  orgasync-backend:
+    build: .
+    # command: uvicorn main:app --host 0.0.0.0 --reload
+    ports:
+      - 8000:8000
+    networks:
+      - orgasync-backend
+
+networks:
+  orgasync-backend:
+    driver: bridge
