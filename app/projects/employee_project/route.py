@@ -4,7 +4,7 @@ from fastapi_pagination import Page, paginate
 from sqlalchemy.orm import Session
 
 from app.employee.model import Employee
-from app.projects.employee_project.model import EmployeeProject
+from app.projects.employee_project.model import EmployeeCompanyProject
 from app.projects.employee_project.response import EmployeeProjectResponse
 from core.database import get_db
 from core.security import oauth2_scheme
@@ -24,7 +24,7 @@ async def get_project(request: Request, db: Session = Depends(get_db)):
     id_user = request.user.id
     print(id_user)
     employees = db.query(Employee).filter(Employee.id_user == id_user).all()
-    projects = db.query(EmployeeProject).all()
+    projects = db.query(EmployeeCompanyProject).all()
     result = []
     for employee in employees:
         for project in projects:
@@ -38,8 +38,8 @@ async def get_project(request: Request, db: Session = Depends(get_db)):
 @employee_project_router.get("/{id_employee_project}", status_code=status.HTTP_200_OK)
 async def get_detail_project(id_employee_project: str, db: Session = Depends(get_db)):
     project = (
-        db.query(EmployeeProject)
-        .filter(EmployeeProject.id == id_employee_project)
+        db.query(EmployeeCompanyProject)
+        .filter(EmployeeCompanyProject.id == id_employee_project)
         .first()
     )
     return project
@@ -52,7 +52,7 @@ async def create_project(
     id_project: str,
     db: Session = Depends(get_db),
 ):
-    project = EmployeeProject(
+    project = EmployeeCompanyProject(
         id=uuid.uuid4(),
         id_employee=id_employee,
         id_project=id_project,
@@ -66,7 +66,9 @@ async def create_project(
 # delete employee project
 @employee_project_router.delete("/{id}", status_code=status.HTTP_200_OK)
 async def delete_project(id: str, db: Session = Depends(get_db)):
-    project = db.query(EmployeeProject).filter(EmployeeProject.id == id).first()
+    project = (
+        db.query(EmployeeCompanyProject).filter(EmployeeCompanyProject.id == id).first()
+    )
     if project:
         db.delete(project)
         db.commit()

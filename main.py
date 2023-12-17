@@ -3,6 +3,7 @@ from fastapi_pagination import add_pagination
 from starlette.middleware.authentication import AuthenticationMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
+import uvicorn
 
 from app.projects.project.route import project_router
 from app.position.routes import position_router
@@ -65,3 +66,7 @@ async def get_file(path: str):
 
 
 add_pagination(app)
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", reload=True, host="0.0.0.0")

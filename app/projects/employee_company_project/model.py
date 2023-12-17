@@ -1,5 +1,6 @@
 import datetime
-from sqlalchemy import Column, DateTime, ForeignKey, String, relationship
+from sqlalchemy import Column, DateTime, ForeignKey, String
+from sqlalchemy.orm import relationship
 from core.database import Base
 
 
@@ -10,4 +11,4 @@ class EmployeeCompanyProject(Base):
     employee = relationship("Employee")
     id_company_project = Column(String(100), ForeignKey("company_project.id"))
     company_project = relationship("CompanyProject")
-    joined = Column(DateTime, default=datetime.now())
+    joined = Column(DateTime, default=datetime.datetime.now)
