@@ -1,7 +1,7 @@
 from multiprocessing import managers
 
 from sqlalchemy.sql import table, column
-from sqlalchemy import String, Integer
+from sqlalchemy import Boolean, String, Integer
 from alembic import op
 
 role_table = table("role", column("id", String), column("name", String))
@@ -12,6 +12,12 @@ type_employee_table = table(
     column("level", Integer),
 )
 type_company_table = table("type_company", column("id", String), column("name", String))
+status_table = table(
+    "status", column("id", String), column("name", String), column("is_done", Boolean)
+)
+priority_table = table(
+    "priority", column("id", String), column("name", String), column("level", Integer)
+)
 
 
 def seed_data():
@@ -72,5 +78,47 @@ def seed_data():
             {"id": "40dce257-335b-480a-a3cd-163e2d74cf15", "name": "Non Profit"},
             {"id": "40dce257-335b-480a-a3cd-163e2d74cf16", "name": "Self Employed"},
             {"id": "40dce257-335b-480a-a3cd-163e2d74cf17", "name": "Other"},
+        ],
+    )
+
+    op.bulk_insert(
+        status_table,
+        [
+            {
+                "id": "7b564147-3c71-4608-9275-a08b533402a1",
+                "name": "todo",
+                "is_done": False,
+            },
+            {
+                "id": "d2f195d6-747e-4bf0-afd6-1c91618ddf0e",
+                "name": "doing",
+                "is_done": False,
+            },
+            {
+                "id": "3663a47b-7231-44a2-8886-64e4bc48bd2b",
+                "name": "done",
+                "is_done": True,
+            },
+        ],
+    )
+
+    op.bulk_insert(
+        priority_table,
+        [
+            {
+                "id": "55d8e9bf-3783-465b-89d9-7e4889fab183",
+                "name": "low",
+                "level": 1,
+            },
+            {
+                "id": "f3b71730-4cfa-4b21-9323-0bded615740e",
+                "name": "medium",
+                "level": 2,
+            },
+            {
+                "id": "9aa3f182-1395-41d6-a4f8-aac3d4a32ec7",
+                "name": "high",
+                "level": 3,
+            },
         ],
     )

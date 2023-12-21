@@ -2,6 +2,7 @@ from typing import List
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
+from app.projects.employee_project.model import EmployeeProject
 from app.projects.project.model import Project
 from app.projects.project.response import ProjectResponse
 from app.projects.project.schema import ProjectRequest
@@ -24,6 +25,15 @@ async def get_project(id_company_project: str, db: Session = Depends(get_db)):
         db.query(Project).filter(Project.id_company_project == id_company_project).all()
     )
     return projects
+
+
+# get detail project
+@project_router.get("/{id_project}", status_code=status.HTTP_200_OK)
+async def get_project_detail(id_project: str, db: Session = Depends(get_db)):
+    project = db.query(Project).filter(Project.id == id_project).first()
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return project
 
 
 # create new project
