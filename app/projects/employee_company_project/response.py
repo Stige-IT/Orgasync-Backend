@@ -1,10 +1,11 @@
 from pydantic import BaseModel
+from app.employee.model import *
+from app.employee.response import EmployeesCompanyResponse
 
 
 class EmployeeCompanyProjectResponse(BaseModel):
     id: str
-    id_employee: str
-    id_company_project: str
+    employee: EmployeesCompanyResponse
 
     class Config:
         from_attributes = True

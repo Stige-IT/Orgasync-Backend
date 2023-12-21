@@ -28,13 +28,11 @@ disable_installed_extensions_check()
 company_router = APIRouter(
     prefix="/company",
     tags=["Company"],
-    responses={
-        400: {"description": "Not Found"},
-    },
+    responses={400: {"description": "Not Found"}},
 )
 
 company_auth_router = APIRouter(
-    prefix="/company/me", tags=["Company"], dependencies=[Depends(oauth2_scheme)]
+    prefix="/company", tags=["Company"], dependencies=[Depends(oauth2_scheme)]
 )
 
 
@@ -45,7 +43,7 @@ async def get_company(db: Session = Depends(get_db)):
 
 
 @company_auth_router.get(
-    "", status_code=status.HTTP_200_OK, response_model=Page[CompanyMeResponse]
+    "/joined", status_code=status.HTTP_200_OK, response_model=Page[CompanyMeResponse]
 )
 async def get_company(request: Request, db: Session = Depends(get_db)):
     company = db.query(Employee).filter(Employee.id_user == request.user.id).all()
@@ -54,7 +52,9 @@ async def get_company(request: Request, db: Session = Depends(get_db)):
 
 # detail company
 @company_auth_router.get(
-    "/detail", status_code=status.HTTP_200_OK, response_model=CompanyDetailResponse
+    "/{id_company}",
+    status_code=status.HTTP_200_OK,
+    response_model=CompanyDetailResponse,
 )
 async def get_detail_company(id_company: str, db: Session = Depends(get_db)):
     company = db.query(Company).get(id_company)
@@ -148,7 +148,8 @@ async def add_employee(
 
 # get employee by company id
 @company_auth_router.get(
-    "/employee",
+    "/{id_company}/employee",
+    description="Get all employee by company id",
     status_code=status.HTTP_200_OK,
     response_model=Page[EmployeesCompanyResponse],
 )
@@ -159,7 +160,7 @@ async def get_employee(id_company: str, db: Session = Depends(get_db)):
 
 # check role user in company
 @company_auth_router.get(
-    "/role", status_code=status.HTTP_200_OK, response_model=RoleResponse
+    "/{id_company}/role", status_code=status.HTTP_200_OK, response_model=RoleResponse
 )
 async def check_role(request: Request, id_company: str, db: Session = Depends(get_db)):
     employee = (

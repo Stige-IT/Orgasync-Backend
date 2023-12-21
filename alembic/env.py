@@ -21,6 +21,7 @@ from app.projects.employee_project.model import *
 from app.projects.project.model import *
 from app.projects.task.model import *
 from app.projects.employee_project_task.model import *
+from app.projects.priotity.model import *
 from app.type.model import *
 from app.auth.model import *
 
