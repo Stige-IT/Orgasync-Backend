@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class TaskRequest(BaseModel):
-    title: str
+    title: Union[str, None] = None
     description: Union[str, None] = None
     id_status: Union[str, None] = None
     id_priority: Union[str, None] = None

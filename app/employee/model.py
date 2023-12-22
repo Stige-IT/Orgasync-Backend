@@ -23,13 +23,18 @@ class Employee(Base):
     id_user = Column(String(100), ForeignKey("users.id"))
     user = relationship("UserModel")
 
-    id_company = Column(String(100), ForeignKey("company.id"))
-    company = relationship("Company")
+    id_company = Column(String(100), ForeignKey("company.id", ondelete="cascade"))
+    company = relationship("Company", backref="employee")
 
     id_position = Column(String(100), ForeignKey("position.id"), nullable=True)
     position = relationship("Position")
 
     joined = Column(DateTime, nullable=True, default=datetime.now)
-    id_type = Column(String(100), ForeignKey("type_employee.id"), nullable=True, default=TypeEmployeeStatus.GUEST.value)
+    id_type = Column(
+        String(100),
+        ForeignKey("type_employee.id"),
+        nullable=True,
+        default=TypeEmployeeStatus.GUEST.value,
+    )
     type = relationship("TypeEmployee", backref="employee", lazy="joined")
     end = Column(DateTime, nullable=True)

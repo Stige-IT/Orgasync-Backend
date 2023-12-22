@@ -64,7 +64,7 @@ async def get_detail_company(id_company: str, db: Session = Depends(get_db)):
     return company
 
 
-@company_auth_router.post("/create", status_code=status.HTTP_201_CREATED)
+@company_auth_router.post("", status_code=status.HTTP_201_CREATED)
 async def create_company(
     request: Request, company_request: CompanyRequest, db: Session = Depends(get_db)
 ):
@@ -86,6 +86,20 @@ async def create_company(
     return {"message": "company has registered"}
 
 
+# delete company
+@company_auth_router.delete("/{id_company}", status_code=status.HTTP_200_OK)
+async def delete_company(id_company: str, db: Session = Depends(get_db)):
+    company = db.query(Company).filter(Company.id == id_company).first()
+    if not company:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Company with id {id_company} not found",
+        )
+    db.delete(company)
+    db.commit()
+    return {"message": "company has deleted"}
+
+
 @company_auth_router.post("/join", status_code=status.HTTP_201_CREATED)
 async def join_company(request: Request, code: str, db: Session = Depends(get_db)):
     company = db.query(Company).filter(Company.code == code).first()
@@ -103,7 +117,9 @@ async def join_company(request: Request, code: str, db: Session = Depends(get_db
 
 
 # add employee with email
-@company_auth_router.post("/add-employee", status_code=status.HTTP_201_CREATED)
+@company_auth_router.post(
+    "/{id_company}/add-employee", status_code=status.HTTP_201_CREATED
+)
 async def add_employee(
     id_company: str, emails: List[str], db: Session = Depends(get_db)
 ):

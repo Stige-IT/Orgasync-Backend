@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination import Page, paginate
 from sqlalchemy.orm import Session
 from app.projects.task.response import TaskResponse
@@ -39,3 +39,36 @@ async def create_task(
     db.commit()
     db.refresh(new_task)
     return new_task
+
+
+# update task
+@task_router.put("/{id_task}", status_code=status.HTTP_200_OK)
+async def update_task(
+    id_task: str, task_request: TaskRequest, db: Session = Depends(get_db)
+):
+    task = db.query(Task).filter(Task.id == id_task).first()
+    if not task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Task with id {id_task} not found",
+        )
+    task.name = task_request.title
+    task.description = task_request.description
+    task.id_status = task_request.id_status
+    db.commit()
+    db.refresh(task)
+    return task
+
+
+# delete task
+@task_router.delete("/{id_task}", status_code=status.HTTP_200_OK)
+async def delete_task(id_task: str, db: Session = Depends(get_db)):
+    task = db.query(Task).filter(Task.id == id_task).first()
+    if not task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Task with id {id_task} not found",
+        )
+    db.delete(task)
+    db.commit()
+    return {"detail": "Task deleted"}
