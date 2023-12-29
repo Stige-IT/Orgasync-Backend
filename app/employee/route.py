@@ -4,6 +4,7 @@ from typing import Annotated, Optional, List
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi_pagination import Page, paginate
+from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
 
 from app.employee.model import Employee, TypeEmployee

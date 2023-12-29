@@ -55,6 +55,22 @@ async def create_project(
     return {"message": "Project has been created."}
 
 
+# update project
+@project_router.put("/{id_project}", status_code=status.HTTP_200_OK)
+async def update_project(
+    id_project: str,
+    projectRequest: ProjectRequest,
+    db: Session = Depends(get_db),
+):
+    project = db.query(Project).filter(Project.id == id_project).first()
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    project.name = projectRequest.name
+    project.description = projectRequest.description
+    db.commit()
+    return {"message": "Project has been updated."}
+
+
 # delete project
 @project_router.delete("/{id_project}", status_code=status.HTTP_200_OK)
 async def delete_project(id_project: str, db: Session = Depends(get_db)):

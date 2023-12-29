@@ -9,9 +9,11 @@ from app.projects.priotity.model import *
 class Task(Base):
     __tablename__ = "task"
     id = Column(String(100), primary_key=True, autoincrement=False)
-    id_employe_project = Column(String(100), ForeignKey("employee_project.id"))
-    employee_project = relationship("EmployeeProject", backref="task")
-    id_project = Column(String(100), ForeignKey("project.id"))
+    id_employee_project = Column(
+        String(100), ForeignKey("employee_company_project.id", ondelete="CASCADE")
+    )
+    assignee = relationship("EmployeeCompanyProject", backref="task")
+    id_project = Column(String(100), ForeignKey("project.id", ondelete="CASCADE"))
     project = relationship("Project", backref="task")
     name = Column(String(100))
     description = Column(String(100), nullable=True)
@@ -27,4 +29,4 @@ class Task(Base):
     created_at = Column(DateTime, default=datetime.now())
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
-    updated_at = Column(DateTime, onupdate=datetime.now())
+    updated_at = Column(DateTime, onupdate=datetime.now)

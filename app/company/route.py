@@ -6,6 +6,7 @@ from fastapi_pagination.utils import disable_installed_extensions_check
 
 from fastapi import APIRouter, status, Depends, HTTPException, Request
 from fastapi_pagination import Page, paginate
+from sqlalchemy import asc
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
@@ -170,7 +171,13 @@ async def add_employee(
     response_model=Page[EmployeesCompanyResponse],
 )
 async def get_employee(id_company: str, db: Session = Depends(get_db)):
-    employees = db.query(Employee).filter(Employee.id_company == id_company).all()
+    employees = (
+        db.query(Employee)
+        .join(UserModel)
+        .filter(Employee.id_company == id_company)
+        .order_by(asc(UserModel.name))
+        .all()
+    )
     return paginate(employees)
 
 

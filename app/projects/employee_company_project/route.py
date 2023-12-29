@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination import Page, paginate
 from app.projects.company_project.model import CompanyProject
 from app.projects.employee_company_project.response import (
@@ -39,7 +39,7 @@ async def get_employee_in_company_project(
 
 # add employee to company project
 @employee_company_project.post(
-    "{company_project_id}/employee/add", status_code=status.HTTP_201_CREATED
+    "/{company_project_id}/employee", status_code=status.HTTP_201_CREATED
 )
 async def add_employee_to_project(
     company_project_id: str,
@@ -56,3 +56,23 @@ async def add_employee_to_project(
         db.commit()
         db.refresh(employee_project)
     return {"message": "Employee has been added to project."}
+
+
+# delete employee from company project
+@employee_company_project.delete(
+    "/{company_project_id}/employee/{id_employee}", status_code=status.HTTP_200_OK
+)
+async def delete_employee_from_project(id_employee: str, db: Session = Depends(get_db)):
+    employee_project = (
+        db.query(EmployeeCompanyProject)
+        .filter(EmployeeCompanyProject.id == id_employee)
+        .first()
+    )
+    if not employee_project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Employee with id {id_employee} not found",
+        )
+    db.delete(employee_project)
+    db.commit()
+    return {"message": "Employee has been deleted from project."}

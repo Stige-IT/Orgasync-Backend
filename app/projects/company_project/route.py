@@ -1,8 +1,10 @@
+import os
 import shutil
 from typing import Annotated, Optional
 import uuid
 from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status, Request
 from fastapi_pagination import Page, paginate
+from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
 
 from app.projects.company_project.model import CompanyProject
@@ -28,7 +30,10 @@ company_project_router = APIRouter(
 )
 async def get_project(id_company: str, db: Session = Depends(get_db)):
     projects = (
-        db.query(CompanyProject).filter(CompanyProject.id_company == id_company).all()
+        db.query(CompanyProject)
+        .filter(CompanyProject.id_company == id_company)
+        .order_by(desc(CompanyProject.created_at))
+        .all()
     )
 
     return paginate(projects)
@@ -92,7 +97,8 @@ async def detail_project(id: str, db: Session = Depends(get_db)):
 @company_project_router.put("/{id}", status_code=status.HTTP_200_OK)
 async def update_project(
     id: str,
-    project: CompanyProjectRequest,
+    name: Annotated[str, Form()],
+    description: Annotated[str, Form()] = None,
     image: Optional[UploadFile] = None,
     db: Session = Depends(get_db),
 ):
@@ -100,17 +106,17 @@ async def update_project(
     if company_project:
         if image:
             # remove old image
-            if company_project.image:
-                shutil.rmtree(f"uploads/{company_project.image}")
+            if company_project.image is not None:
+                os.remove(f"uploads/{company_project.image}")
             company_project.image = image.filename
             with open(f"uploads/{image.filename}", "wb") as buffer:
                 shutil.copyfileobj(image.file, buffer)
-        company_project.name = project.name
-        company_project.description = project.description
+        company_project.name = name
+        company_project.description = description
         db.commit()
         db.refresh(company_project)
         return {"message": "Project has been updated."}
-    return {"message": "Project not found."}
+    raise HTTPException(status_code=404, detail="Project not found.")
 
 
 # delete company project

@@ -7,7 +7,7 @@ from core.database import Base
 class CompanyProject(Base):
     __tablename__ = "company_project"
     id = Column(String(100), primary_key=True, autoincrement=False)
-    id_company = Column(String(100), ForeignKey("company.id"))
+    id_company = Column(String(100), ForeignKey("company.id", ondelete="CASCADE"))
     company = relationship("Company", backref="company_project", lazy="joined")
     name = Column(String(100))
     description = Column(String(255), nullable=True)
