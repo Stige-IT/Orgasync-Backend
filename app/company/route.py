@@ -8,10 +8,7 @@ from fastapi import APIRouter, status, Depends, HTTPException, Request
 from fastapi_pagination import Page, paginate
 from sqlalchemy import asc
 from sqlalchemy.orm import Session
-from starlette.responses import JSONResponse
 
-from app.auth.schema import LoginRequest
-from app.auth.services import get_token
 from app.company.model import Company
 from app.company.response import CompanyDetailResponse, CompanyMeResponse, RoleResponse
 from app.company.schema import CompanyRequest
@@ -19,7 +16,7 @@ from app.company.services import join_company_user
 from app.employee.enums import TypeEmployeeStatus
 from app.employee.model import Employee
 from app.employee.response import EmployeesCompanyResponse
-from app.position.constant import defaulIdPosition
+from app.position.constant import ownerPosition
 from app.users.model import UserModel
 from core.database import get_db
 from core.security import get_password_hash, oauth2_scheme
@@ -115,6 +112,46 @@ async def join_company(request: Request, code: str, db: Session = Depends(get_db
     id_user = request.user.id
     await join_company_user(db, code, id_user)
     return {"message": "user has joined"}
+
+
+# leave company
+@company_auth_router.delete("/{id_company}/leave", status_code=status.HTTP_200_OK)
+async def leave_company(
+    id_company: str, request: Request, db: Session = Depends(get_db)
+):
+    employee = (
+        db.query(Employee)
+        .filter(Employee.id_user == request.user.id)
+        .filter(Employee.id_company == id_company)
+        .first()
+    )
+    if not employee:
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "message": "User not found",
+                "code": "not found",
+            },
+        )
+    # check if users owner in company is only one
+    owner = (
+        db.query(Employee)
+        .filter(Employee.id_company == id_company)
+        .filter(Employee.id_position == ownerPosition)
+        .count()
+    )
+    if owner == 1 and employee.id_position == ownerPosition:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "message": "You can't leave company, because you are the only owner",
+                "code": "unauthorized",
+            },
+        )
+
+    db.delete(employee)
+    db.commit()
+    return {"message": "user has leave"}
 
 
 # add employee with email

@@ -4,7 +4,7 @@ from fastapi_pagination import Page, paginate
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from app.projects.status.model import Status
-from app.projects.task.response import TaskList, TaskResponse
+from app.projects.task.response import TaskItem, TaskList, TaskResponse
 from app.projects.task.schema import TaskRequest
 from core.database import get_db
 from core.security import oauth2_scheme
@@ -42,6 +42,18 @@ async def get_task(id_project: str, db: Session = Depends(get_db)):
     return result
 
 
+# get task by id
+@task_router.get("/{id_task}", status_code=status.HTTP_200_OK, response_model=TaskItem)
+async def get_task_by_id(id_task: str, db: Session = Depends(get_db)):
+    task = db.query(Task).filter(Task.id == id_task).first()
+    if not task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Task with id {id_task} not found",
+        )
+    return task
+
+
 # create new task
 @task_router.post("", status_code=status.HTTP_201_CREATED)
 async def create_task(
@@ -50,7 +62,7 @@ async def create_task(
     new_task = Task(
         id=uuid.uuid4(),
         id_project=id_project,
-        name=task_request.title,
+        title=task_request.title,
         description=task_request.description,
         id_status=task_request.id_status,
         id_priority=task_request.id_priority,
@@ -78,7 +90,7 @@ async def update_task(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Task with id {id_task} not found",
         )
-    task.name = task_request.title
+    task.title = task_request.title
     task.description = task_request.description
     task.id_status = task_request.id_status
     task.id_priority = task_request.id_priority

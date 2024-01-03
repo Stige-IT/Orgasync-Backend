@@ -15,7 +15,7 @@ class Task(Base):
     assignee = relationship("EmployeeCompanyProject", backref="task")
     id_project = Column(String(100), ForeignKey("project.id", ondelete="CASCADE"))
     project = relationship("Project", backref="task")
-    name = Column(String(100))
+    title = Column(String(100))
     description = Column(String(100), nullable=True)
     id_status = Column(
         String(100),

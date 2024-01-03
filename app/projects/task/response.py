@@ -24,12 +24,12 @@ class TaskResponse(BaseModel):
 class TaskItem(BaseModel):
     id: str
     id_project: str
-    name: str
+    title: str
     description: Union[str, None] = None
     status: Union[StatusResponse, None] = None
     assignee: Union[EmployeeCompanyProjectResponse, None] = None
     priority: Union[PriorityResponse, None] = None
-    start_date: datetime
+    start_date: Union[datetime, None] = None
     end_date: Union[datetime, None] = None
     created_at: datetime
     updated_at: Union[datetime, None] = None
