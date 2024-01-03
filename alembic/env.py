@@ -16,10 +16,12 @@ from app.company.model import *
 from app.employee.model import *
 from app.projects.status.model import *
 from app.projects.company_project.model import *
+from app.projects.employee_company_project.model import *
 from app.projects.employee_project.model import *
 from app.projects.project.model import *
 from app.projects.task.model import *
 from app.projects.employee_project_task.model import *
+from app.projects.priotity.model import *
 from app.type.model import *
 from app.auth.model import *
 
@@ -87,9 +89,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

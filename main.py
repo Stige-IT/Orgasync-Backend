@@ -3,6 +3,7 @@ from fastapi_pagination import add_pagination
 from starlette.middleware.authentication import AuthenticationMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
+import uvicorn
 
 from app.projects.project.route import project_router
 from app.position.routes import position_router
@@ -14,6 +15,9 @@ from app.projects.company_project.route import company_project_router
 from app.projects.employee_company_project.route import employee_company_project
 from app.projects.employee_project.route import employee_project_router
 from app.type.route import type_company_router
+from app.projects.task.route import task_router
+from app.projects.status.route import status_router
+from app.projects.priotity.route import priority_router
 from core.security import JWTAuth
 from app.users.routes import router, user_router
 
@@ -36,6 +40,9 @@ app.include_router(company_project_router)
 app.include_router(employee_company_project)
 app.include_router(employee_project_router)
 app.include_router(project_router)
+app.include_router(task_router)
+app.include_router(status_router)
+app.include_router(priority_router)
 
 # middleware
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())
@@ -65,3 +72,6 @@ async def get_file(path: str):
 
 
 add_pagination(app)
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", reload=True)

@@ -4,16 +4,7 @@ from datetime import datetime
 from sqlalchemy.orm import deferred, relationship
 
 from core.database import Base
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    DateTime,
-    func,
-    TEXT,
-    Boolean,
-    ForeignKey,
-)
+from sqlalchemy import Column, Integer, String, TEXT, ForeignKey
 
 
 class Company(Base):
@@ -29,3 +20,4 @@ class Company(Base):
     description = Column(String(255), nullable=True)
     id_type_company = Column(String(100), ForeignKey("type_company.id"), nullable=True)
     type_company = relationship("TypeCompany", backref="company", lazy="joined")
+    employees = relationship("Employee", cascade="all, delete-orphan")
