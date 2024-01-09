@@ -23,6 +23,9 @@ from app.projects.task.model import *
 from app.projects.employee_project_task.model import *
 from app.projects.priotity.model import *
 from app.type.model import *
+from app.logbooks.logbook.model import *
+from app.logbooks.logbook_activity.model import *
+from app.logbooks.logbook_employee.model import *
 from app.auth.model import *
 
 

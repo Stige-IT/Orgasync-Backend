@@ -24,7 +24,7 @@ class Employee(Base):
     user = relationship("UserModel")
 
     id_company = Column(String(100), ForeignKey("company.id", ondelete="cascade"))
-    company = relationship("Company", backref="employee")
+    company = relationship("Company")
 
     id_position = Column(String(100), ForeignKey("position.id"), nullable=True)
     position = relationship("Position")
@@ -36,5 +36,5 @@ class Employee(Base):
         nullable=True,
         default=TypeEmployeeStatus.GUEST.value,
     )
-    type = relationship("TypeEmployee", backref="employee", lazy="joined")
+    type = relationship("TypeEmployee", lazy="joined")
     end = Column(DateTime, nullable=True)

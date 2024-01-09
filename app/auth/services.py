@@ -19,7 +19,6 @@ from app.users.model import UserModel
 settings = get_settings()
 
 
-# noinspection PyTypeChecker
 async def get_token(data, db: Session, is_form: bool):
     if is_form:
         user: UserModel = (
