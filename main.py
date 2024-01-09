@@ -18,6 +18,9 @@ from app.type.route import type_company_router
 from app.projects.task.route import task_router
 from app.projects.status.route import status_router
 from app.projects.priotity.route import priority_router
+from app.logbooks.logbook.route import logbook_router
+from app.logbooks.logbook_employee.route import logbook_employee_router
+from app.logbooks.logbook_activity.route import logbook_activity_router
 from core.security import JWTAuth
 from app.users.routes import router, user_router
 
@@ -43,6 +46,9 @@ app.include_router(project_router)
 app.include_router(task_router)
 app.include_router(status_router)
 app.include_router(priority_router)
+app.include_router(logbook_router)
+app.include_router(logbook_employee_router)
+app.include_router(logbook_activity_router)
 
 # middleware
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())

@@ -1,10 +1,12 @@
+import os
+import shutil
 import uuid
 from datetime import datetime
-from typing import List
+from typing import Annotated, List, Optional
 
 from fastapi_pagination.utils import disable_installed_extensions_check
 
-from fastapi import APIRouter, status, Depends, HTTPException, Request
+from fastapi import APIRouter, Form, UploadFile, status, Depends, HTTPException, Request
 from fastapi_pagination import Page, paginate
 from sqlalchemy import asc
 from sqlalchemy.orm import Session
@@ -82,6 +84,33 @@ async def create_company(
         db, str(code)[:7], request.user.id, TypeEmployeeStatus.OWNER.value
     )
     return {"message": "company has registered"}
+
+
+# update company
+@company_auth_router.put("/{id_company}", status_code=status.HTTP_200_OK)
+async def update_company(
+    id_company: str,
+    name: Annotated[str, Form()],
+    image: Optional[UploadFile] = None,
+    db: Session = Depends(get_db),
+):
+    company = db.query(Company).filter(Company.id == id_company).first()
+    if not company:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Company with id {id_company} not found",
+        )
+    company.name = name
+    if image and image is not None:
+        if company.logo is not None:
+            os.remove(f"uploads/{company.logo}")
+        random_string = str(uuid.uuid4())
+        filename = f"{random_string}-{image.filename}"
+        company.logo = filename
+        with open(f"uploads/{filename}", "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+    db.commit()
+    return {"message": "company has updated"}
 
 
 # delete company

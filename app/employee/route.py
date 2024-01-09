@@ -22,29 +22,6 @@ employee_router = APIRouter(
 )
 
 
-# create new Employee
-@employee_router.post("", status_code=status.HTTP_201_CREATED)
-async def create_employee(
-    request: Request, employee: EmployeeCreateRequest, db: Session = Depends(get_db)
-):
-    user_registered = (
-        db.query(Employee).filter(Employee.id_user == employee.id_user).first()
-    )
-    if user_registered:
-        return {"message": "user already joined"}
-    employee = Employee(
-        id=uuid.uuid4(),
-        id_user=employee.id_user,
-        id_company=request.user.id,
-        joined=datetime.now(),
-        type=employee.type,
-    )
-    db.add(employee)
-    db.commit()
-    db.refresh(employee)
-    return employee
-
-
 @employee_router.get(
     "/{company_id}",
     status_code=status.HTTP_200_OK,
