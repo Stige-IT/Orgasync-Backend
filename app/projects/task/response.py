@@ -33,6 +33,8 @@ class TaskItem(BaseModel):
     end_date: Union[datetime, None] = None
     created_at: datetime
     updated_at: Union[datetime, None] = None
+    created_by_employee: Union[EmployeeCompanyProjectResponse, None] = None
+    updated_by_employee: Union[EmployeeCompanyProjectResponse, None] = None
 
     class Config:
         from_attributes = True
@@ -45,3 +47,14 @@ class TaskList(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# Task ME
+
+
+class TaskMe(BaseModel):
+    id_company_project: str
+    id_project: str
+    name_project: str
+    description_project: str
+    task: list[TaskItem]

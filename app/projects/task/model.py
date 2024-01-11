@@ -12,7 +12,11 @@ class Task(Base):
     id_employee_project = Column(
         String(100), ForeignKey("employee_company_project.id", ondelete="CASCADE")
     )
-    assignee = relationship("EmployeeCompanyProject", backref="task")
+    assignee = relationship(
+        "EmployeeCompanyProject",
+        backref="task",
+        foreign_keys="Task.id_employee_project",
+    )
     id_project = Column(String(100), ForeignKey("project.id", ondelete="CASCADE"))
     project = relationship("Project", backref="task")
     title = Column(String(100))
@@ -29,4 +33,20 @@ class Task(Base):
     created_at = Column(DateTime, default=datetime.now())
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
-    updated_at = Column(DateTime, onupdate=datetime.now)
+    updated_at = Column(DateTime, onupdate=datetime.now, default=datetime.now())
+    updated_by = Column(
+        String(100),
+        ForeignKey("employee_company_project.id", ondelete="CASCADE"),
+        nullable=True,
+    )
+    updated_by_employee = relationship(
+        "EmployeeCompanyProject", foreign_keys="Task.updated_by"
+    )
+    created_by = Column(
+        String(100),
+        ForeignKey("employee_company_project.id", ondelete="CASCADE"),
+        nullable=True,
+    )
+    created_by_employee = relationship(
+        "EmployeeCompanyProject", foreign_keys="Task.created_by"
+    )

@@ -87,17 +87,20 @@ def seed_data():
             {
                 "id": "7b564147-3c71-4608-9275-a08b533402a1",
                 "name": "todo",
-                "is_done": False,
+                "color": "a83232",
+                "level": 3,
             },
             {
                 "id": "d2f195d6-747e-4bf0-afd6-1c91618ddf0e",
                 "name": "doing",
-                "is_done": False,
+                "color": "ffe100",
+                "level": 2,
             },
             {
                 "id": "3663a47b-7231-44a2-8886-64e4bc48bd2b",
                 "name": "done",
-                "is_done": True,
+                "color": "00c900",
+                "level": 1,
             },
         ],
     )

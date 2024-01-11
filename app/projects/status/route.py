@@ -16,5 +16,5 @@ status_router = APIRouter(
 # get status
 @status_router.get("")
 async def get_status(db: Session = Depends(get_db)):
-    status = db.query(Status).all()
+    status = db.query(Status).order_by(Status.level.desc()).order_by(Status.name).all()
     return status
