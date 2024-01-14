@@ -92,6 +92,7 @@ async def update_company(
     id_company: str,
     name: Annotated[str, Form()],
     image: Optional[UploadFile] = None,
+    cover: Optional[UploadFile] = None,
     db: Session = Depends(get_db),
 ):
     company = db.query(Company).filter(Company.id == id_company).first()
@@ -109,6 +110,15 @@ async def update_company(
         company.logo = filename
         with open(f"uploads/{filename}", "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
+
+    if cover and cover is not None:
+        if company.cover is not None:
+            os.remove(f"uploads/{company.cover}")
+        random_string = str(uuid.uuid4())
+        filename = f"{random_string}-{cover.filename}"
+        company.cover = filename
+        with open(f"uploads/{filename}", "wb") as buffer:
+            shutil.copyfileobj(cover.file, buffer)        
     db.commit()
     return {"message": "company has updated"}
 

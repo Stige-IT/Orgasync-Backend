@@ -24,9 +24,9 @@ class CompanyProjectResponse(BaseModel):
 class CompanyProjectResult(BaseModel):
     company_project: CompanyProjectResponse
     total_employee: Union[None, int] = 0
-    employee: List[EmployeeCompanyProjectResponse] = []
+    # employee: List[EmployeeCompanyProjectResponse] = []
     total_project: Union[None, int] = 0
-    project: List[ProjectResponse] = []
+    # project: List[ProjectResponse] = []
 
     class Config:
         from_attributes = True

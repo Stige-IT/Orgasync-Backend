@@ -86,9 +86,9 @@ async def detail_project(id: str, db: Session = Depends(get_db)):
         return CompanyProjectResult(
             company_project=company_project,
             total_employee=len(employee),
-            employee=employee,
+            # employee=employee,
             total_project=len(projects),
-            project=projects,
+            # project=projects,
         )
     return HTTPException(status_code=404, detail="Project not found.")
 

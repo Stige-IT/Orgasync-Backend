@@ -6,6 +6,8 @@ from app.projects.employee_project.model import EmployeeProject
 from app.projects.project.model import Project
 from app.projects.project.response import ProjectResponse
 from app.projects.project.schema import ProjectRequest
+from app.projects.status.model import Status
+from app.projects.task.model import Task
 from core.database import get_db
 from core.security import oauth2_scheme
 
@@ -18,13 +20,39 @@ project_router = APIRouter(
 
 
 @project_router.get(
-    "", status_code=status.HTTP_200_OK, response_model=List[ProjectResponse]
+    "",
+    status_code=status.HTTP_200_OK,
+    response_model=List[ProjectResponse],
 )
 async def get_project(id_company_project: str, db: Session = Depends(get_db)):
     projects = (
         db.query(Project).filter(Project.id_company_project == id_company_project).all()
     )
-    return projects
+    result = []
+    for project in projects:
+        tasks = db.query(Task).filter(Task.id_project == project.id).all()
+        done = (
+            db.query(Task)
+            .filter(Task.id_project == project.id)
+            .join(Status)
+            .filter(Status.level == 1)
+            .all()
+        )
+        percentase = (len(done) / len(tasks)) * 100
+        result.append(
+            ProjectResponse(
+                id=project.id,
+                # id_company_project=project.id_company_project,
+                name=project.name,
+                description=project.description,
+                total_task=len(tasks),
+                done=len(done),
+                undone=len(tasks) - len(done),
+                percentase=percentase,
+                created_at=project.created_at,
+            )
+        )
+    return result
 
 
 # get detail project

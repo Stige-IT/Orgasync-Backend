@@ -95,7 +95,7 @@ async def delete_employee(id: str, db: Session = Depends(get_db)):
 # get type employee
 @employee_router.get("/show/type", status_code=status.HTTP_200_OK)
 async def get_type_employee(db: Session = Depends(get_db)):
-    employees = db.query(TypeEmployee).order_by(TypeEmployee.level).all()
+    employees = db.query(TypeEmployee).order_by(TypeEmployee.name).all()
     return employees
 
 
